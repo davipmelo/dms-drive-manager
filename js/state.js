@@ -58,6 +58,22 @@ class StateStore {
       isGuest: true
     });
 
+    // Tag Registry (tagName -> hex color)
+    this.tags = this.loadFromLocalStorage('dms_tags_registry_v1', {
+      '6K RAW': '#ffbb00',
+      'DaVinci': '#8b5cf6',
+      'Comercial': '#f59e0b',
+      'ProRes 422': '#3b82f6',
+      'Doc': '#10b981',
+      'Premiere': '#8b5cf6',
+      'Sony FX3': '#06b6d4',
+      'XAVC-S': '#3b82f6',
+      'After Effects': '#8b5cf6',
+      '4K ProRes HQ': '#ffbb00',
+      'Institucional': '#10b981',
+      'Arquivado': '#71717a'
+    });
+
     // Active filters
     this.filters = {
       searchQuery: '',
@@ -84,6 +100,7 @@ class StateStore {
         localStorage.setItem(STORAGE_KEYS.DRIVES, JSON.stringify(this.drives));
         localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(this.projects));
         localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(this.currentUser));
+        localStorage.setItem('dms_tags_registry_v1', JSON.stringify(this.tags));
       } catch (e) {
         console.warn('LocalStorage save error:', e);
       }
@@ -136,6 +153,36 @@ class StateStore {
       tag: 'all'
     };
     this.notify();
+  }
+
+  // Tag Management
+  getTagColor(tagName) {
+    if (!tagName) return '#ffbb00';
+    return this.tags[tagName.trim()] || '#ffbb00';
+  }
+
+  setTag(tagName, color) {
+    if (!tagName) return;
+    const clean = tagName.trim();
+    if (!clean) return;
+    this.tags[clean] = color || '#ffbb00';
+    try {
+      localStorage.setItem('dms_tags_registry_v1', JSON.stringify(this.tags));
+    } catch(e) {}
+    this.notify();
+  }
+
+  getAllTags() {
+    const tagSet = new Set(Object.keys(this.tags));
+    for (const p of this.projects) {
+      for (const t of (p.tags || [])) {
+        if (t && t.trim()) tagSet.add(t.trim());
+      }
+    }
+    return Array.from(tagSet).sort((a, b) => a.localeCompare(b)).map(name => ({
+      name,
+      color: this.getTagColor(name)
+    }));
   }
 
   // Drive CRUD
@@ -331,6 +378,7 @@ class StateStore {
     let safeBackupCount = 0;
     let unassignedProjectsCount = 0;
     let atRiskCount = 0;
+    const atRiskProjects = [];
 
     for (const project of this.projects) {
       const copies = (project.drives || []).length;
@@ -340,10 +388,16 @@ class StateStore {
       if (copies === 0) {
         unassignedProjectsCount++;
         singleCopyCount++;
-        if (!isArchived) atRiskCount++;
+        if (!isArchived) {
+          atRiskCount++;
+          atRiskProjects.push(project);
+        }
       } else if (copies === 1) {
         singleCopyCount++;
-        if (!isArchived) atRiskCount++;
+        if (!isArchived) {
+          atRiskCount++;
+          atRiskProjects.push(project);
+        }
       } else {
         safeBackupCount++;
       }
@@ -367,7 +421,8 @@ class StateStore {
       singleCopyCount,
       safeBackupCount,
       safeBackupPct,
-      atRiskCount
+      atRiskCount,
+      atRiskProjects
     };
   }
 

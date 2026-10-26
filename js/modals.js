@@ -136,6 +136,126 @@ export function handleDriveFormSubmit(e) {
 // ==========================================================================
 // 2. PROJECT MODAL (Criar / Editar Projeto)
 // ==========================================================================
+
+// Tag management state for project modal
+let currentModalProjectTags = [];
+let isTagEventsInitialized = false;
+
+function renderModalSelectedTags() {
+  const container = document.getElementById('project-selected-tags-box');
+  const hiddenInput = document.getElementById('project-tags-input');
+  if (!container) return;
+
+  if (hiddenInput) {
+    hiddenInput.value = currentModalProjectTags.join(', ');
+  }
+
+  if (currentModalProjectTags.length === 0) {
+    container.innerHTML = `
+      <div style="font-size:11px; color:var(--text-muted); font-style:italic; padding:4px 0;">
+        Nenhuma tag selecionada para este projeto.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = currentModalProjectTags.map(tag => {
+    const color = state.getTagColor(tag);
+    return `
+      <span class="selected-tag-pill" style="background:${color}22; color:${color}; border:1px solid ${color}55;">
+        <span>${tag}</span>
+        <button type="button" class="btn-remove-selected-tag" data-tag="${tag}" title="Remover tag">✕</button>
+      </span>
+    `;
+  }).join('');
+
+  container.querySelectorAll('.btn-remove-selected-tag').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const tagToRemove = btn.dataset.tag;
+      currentModalProjectTags = currentModalProjectTags.filter(t => t !== tagToRemove);
+      renderModalSelectedTags();
+    });
+  });
+}
+
+function populateExistingTagsDropdown() {
+  const select = document.getElementById('project-existing-tags-select');
+  if (!select) return;
+
+  const allTags = state.getAllTags();
+  select.innerHTML = `
+    <option value="">-- Selecione uma tag existente (${allTags.length}) --</option>
+    ${allTags.map(t => `<option value="${t.name}">${t.name}</option>`).join('')}
+  `;
+}
+
+function setupProjectModalTagEvents() {
+  if (isTagEventsInitialized) return;
+  isTagEventsInitialized = true;
+
+  // Existing tags select
+  const select = document.getElementById('project-existing-tags-select');
+  if (select) {
+    select.addEventListener('change', () => {
+      const val = select.value.trim();
+      if (val && !currentModalProjectTags.includes(val)) {
+        currentModalProjectTags.push(val);
+        renderModalSelectedTags();
+      }
+      select.value = '';
+    });
+  }
+
+  // Tag color swatches inline
+  document.querySelectorAll('#new-tag-color-swatches .color-swatch-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#new-tag-color-swatches .color-swatch-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      const colorInput = document.getElementById('new-tag-color-input');
+      if (colorInput) colorInput.value = btn.dataset.color;
+    });
+  });
+
+  // Add new tag button
+  const addBtn = document.getElementById('btn-add-new-tag');
+  const nameInput = document.getElementById('new-tag-name-input');
+  const handleAddNewTag = () => {
+    if (!nameInput) return;
+    const name = nameInput.value.trim();
+    const colorInput = document.getElementById('new-tag-color-input');
+    const color = colorInput ? colorInput.value : '#ffbb00';
+
+    if (!name) {
+      showToast('Digite o nome da nova tag.', 'warning');
+      nameInput.focus();
+      return;
+    }
+
+    state.setTag(name, color);
+    if (!currentModalProjectTags.includes(name)) {
+      currentModalProjectTags.push(name);
+    }
+    renderModalSelectedTags();
+    populateExistingTagsDropdown();
+    nameInput.value = '';
+    showToast(`Tag "${name}" criada e adicionada!`);
+  };
+
+  if (addBtn) {
+    addBtn.addEventListener('click', handleAddNewTag);
+  }
+
+  if (nameInput) {
+    nameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleAddNewTag();
+      }
+    });
+  }
+}
+
 export function openProjectModal(projectToEdit = null, preselectedDriveId = null) {
   const modal = document.getElementById('project-modal');
   if (!modal) return;
@@ -156,7 +276,14 @@ export function openProjectModal(projectToEdit = null, preselectedDriveId = null
     document.getElementById('project-size-unit').value = 'GB';
   }
 
-  document.getElementById('project-tags-input').value = isEdit ? projectToEdit.tags.join(', ') : '';
+  // Tags Setup
+  setupProjectModalTagEvents();
+  currentModalProjectTags = isEdit ? [...(projectToEdit.tags || [])] : [];
+  renderModalSelectedTags();
+  populateExistingTagsDropdown();
+  const newTagNameInput = document.getElementById('new-tag-name-input');
+  if (newTagNameInput) newTagNameInput.value = '';
+
   document.getElementById('project-notes-input').value = isEdit ? (projectToEdit.notes || '') : '';
 
   // Render Drive Assignment Checkboxes
@@ -218,8 +345,9 @@ export function handleProjectFormSubmit(e) {
   const sizeUnit = document.getElementById('project-size-unit').value;
   const sizeGB = sizeUnit === 'TB' ? sizeVal * 1000 : sizeVal;
 
-  const tagsRaw = document.getElementById('project-tags-input').value;
-  const tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
+  const tags = currentModalProjectTags.length > 0 
+    ? [...currentModalProjectTags] 
+    : document.getElementById('project-tags-input').value.split(',').map(t => t.trim()).filter(Boolean);
   const notes = document.getElementById('project-notes-input').value.trim();
 
   // Selected drives

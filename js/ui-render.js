@@ -136,7 +136,7 @@ function renderSidebarStorage() {
           </div>
         </div>
 
-        <div class="metric-pill-card ${stats.atRiskCount > 0 ? 'has-risk' : ''}" style="grid-column: 1 / -1;">
+        <div class="metric-pill-card ${stats.atRiskCount > 0 ? 'has-risk' : ''}" id="sidebar-at-risk-card" style="grid-column: 1 / -1; cursor: pointer;">
           <div class="metric-info" style="flex:1;">
             <div style="display:flex; justify-content:space-between; align-items:baseline;">
               <span class="metric-label" style="${stats.atRiskCount > 0 ? 'color: #ef4444; font-weight: 800;' : ''}">PROJETOS EM RISCO</span>
@@ -205,6 +205,80 @@ function renderSidebarStorage() {
       }
     });
   });
+
+  // Hover Popover on "Projetos em Risco"
+  const atRiskCard = sidebar.querySelector('#sidebar-at-risk-card');
+  if (atRiskCard) {
+    let tooltip = document.getElementById('at-risk-floating-tooltip');
+    if (!tooltip) {
+      tooltip = document.createElement('div');
+      tooltip.id = 'at-risk-floating-tooltip';
+      tooltip.className = 'at-risk-floating-tooltip';
+      document.body.appendChild(tooltip);
+    }
+
+    let hideTimeout = null;
+
+    const showTooltip = () => {
+      clearTimeout(hideTimeout);
+      const atRiskProjects = stats.atRiskProjects || [];
+      const rect = atRiskCard.getBoundingClientRect();
+
+      tooltip.innerHTML = `
+        <div class="at-risk-tooltip-header">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${atRiskProjects.length > 0 ? '#ef4444' : '#10b981'}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <strong style="color:${atRiskProjects.length > 0 ? '#ef4444' : '#10b981'}; font-size:12px;">
+              ${atRiskProjects.length > 0 ? `Projetos em Risco (${atRiskProjects.length})` : 'Tudo Seguro'}
+            </strong>
+          </div>
+        </div>
+
+        ${atRiskProjects.length === 0 ? `
+          <div style="font-size:11px; color:var(--text-muted); padding:8px 0; text-align:center;">
+            Todos os projetos possuem 2+ cópias ou estão arquivados.
+          </div>
+        ` : `
+          <div class="at-risk-tooltip-list">
+            ${atRiskProjects.map(proj => {
+              const drive = proj.drives && proj.drives.length > 0 ? state.drives.find(d => d.id === proj.drives[0]) : null;
+              return `
+                <div class="at-risk-tooltip-item">
+                  <div style="font-weight:600; font-size:12px; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${proj.name}</div>
+                  <div style="font-size:10px; color:var(--text-muted); display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
+                    <span>${proj.client} • ${state.constructor.formatGB(proj.sizeGB)}</span>
+                    <span style="color:${drive ? (drive.color || '#ffbb00') : '#ef4444'}; font-weight:700;">
+                      ${drive ? drive.name : 'Sem Drive'}
+                    </span>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `}
+      `;
+
+      const topPos = Math.max(10, Math.min(window.innerHeight - 340, rect.top));
+      tooltip.style.top = `${topPos}px`;
+      tooltip.style.left = `${rect.right + 10}px`;
+      tooltip.classList.add('visible');
+    };
+
+    const hideTooltip = () => {
+      hideTimeout = setTimeout(() => {
+        tooltip.classList.remove('visible');
+      }, 150);
+    };
+
+    atRiskCard.addEventListener('mouseenter', showTooltip);
+    atRiskCard.addEventListener('mouseleave', hideTooltip);
+    tooltip.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
+    tooltip.addEventListener('mouseleave', hideTooltip);
+  }
 }
 
 // 3. Floating Filters Popover (Triggered by the button in Workbench)
@@ -523,7 +597,10 @@ function renderDrivesWorkbench() {
                           <div class="subproject-name-cell">
                             <span class="subproject-name" title="${project.name}">${project.name}</span>
                             <div class="subproject-tags" style="display:flex; gap:4px; margin-top:2px; flex-wrap:wrap;">
-                              ${project.tags.map(t => `<span class="project-tag">${t}</span>`).join('')}
+                              ${project.tags.map(t => {
+                                const tc = state.getTagColor(t);
+                                return `<span class="project-tag" style="background:${tc}18; color:${tc}; border-color:${tc}44;">${t}</span>`;
+                              }).join('')}
                             </div>
                           </div>
                         </td>
@@ -692,8 +769,11 @@ function renderProjectCard(project, currentDriveId) {
 
       <div class="project-meta-row">
         <div class="project-tags">
-          ${project.tags.slice(0, 2).map(tag => `<span class="project-tag">${tag}</span>`).join('')}
-          ${project.tags.length > 2 ? `<span class="project-tag">+${project.tags.length - 2}</span>` : ''}
+          ${project.tags.slice(0, 3).map(tag => {
+            const tc = state.getTagColor(tag);
+            return `<span class="project-tag" style="background:${tc}18; color:${tc}; border-color:${tc}44;">${tag}</span>`;
+          }).join('')}
+          ${project.tags.length > 3 ? `<span class="project-tag">+${project.tags.length - 3}</span>` : ''}
         </div>
         ${backupPill}
       </div>
@@ -742,7 +822,10 @@ function renderProjectListRow(project, currentDriveId) {
           <div class="project-list-client">${project.client}</div>
         </div>
         <div class="project-tags" style="display:flex; gap:4px; flex-wrap:wrap;">
-          ${project.tags.slice(0, 2).map(tag => `<span class="project-tag">${tag}</span>`).join('')}
+          ${project.tags.slice(0, 2).map(tag => {
+            const tc = state.getTagColor(tag);
+            return `<span class="project-tag" style="background:${tc}18; color:${tc}; border-color:${tc}44;">${tag}</span>`;
+          }).join('')}
         </div>
         <div class="project-list-size">${state.constructor.formatGB(project.sizeGB)}</div>
         ${backupPill}
@@ -857,7 +940,10 @@ function renderProjectsTable() {
         <td>${backupBadge}</td>
         <td>
           <div style="display:flex; flex-wrap:wrap; gap:3px;">
-            ${proj.tags.map(t => `<span class="project-tag">${t}</span>`).join('')}
+            ${proj.tags.map(t => {
+              const tc = state.getTagColor(t);
+              return `<span class="project-tag" style="background:${tc}18; color:${tc}; border-color:${tc}44;">${t}</span>`;
+            }).join('')}
           </div>
         </td>
         <td>

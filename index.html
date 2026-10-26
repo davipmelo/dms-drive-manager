@@ -337,8 +337,44 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="project-tags-input">Tags (Separadas por vírgula)</label>
-            <input type="text" id="project-tags-input" class="form-input" placeholder="Ex: 4K RAW, DaVinci, Comercial, Finalizado" />
+            <label class="form-label">Tags do Projeto</label>
+            <input type="hidden" id="project-tags-input" value="" />
+            
+            <!-- Tags Selected for Current Project -->
+            <div id="project-selected-tags-box" class="project-tags-chips-container">
+              <!-- Dynamically populated selected tag pills with (X) button -->
+            </div>
+
+            <!-- Existing Tags Dropdown Picker -->
+            <div style="margin-top: 8px;">
+              <label class="form-hint" style="margin-bottom: 4px; display: block;">Escolha entre as tags já cadastradas:</label>
+              <select id="project-existing-tags-select" class="form-select">
+                <option value="">-- Selecione uma tag existente --</option>
+              </select>
+            </div>
+
+            <!-- Create New Tag Inline Form -->
+            <div class="new-tag-creation-box" style="margin-top: 10px; padding: 10px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
+              <label class="form-hint" style="margin-bottom: 6px; display: block; font-weight: 600;">Ou crie uma nova tag com cor personalizada:</label>
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <input type="text" id="new-tag-name-input" class="form-input" placeholder="Nome da nova tag..." style="flex: 1; min-width: 140px;" />
+                
+                <input type="hidden" id="new-tag-color-input" value="#ffbb00" />
+                <div class="color-swatches tag-swatches-inline" id="new-tag-color-swatches">
+                  <button type="button" class="color-swatch-btn selected" data-color="#ffbb00" style="background:#ffbb00;" title="Amarelo"></button>
+                  <button type="button" class="color-swatch-btn" data-color="#f59e0b" style="background:#f59e0b;" title="Âmbar"></button>
+                  <button type="button" class="color-swatch-btn" data-color="#3b82f6" style="background:#3b82f6;" title="Azul"></button>
+                  <button type="button" class="color-swatch-btn" data-color="#8b5cf6" style="background:#8b5cf6;" title="Roxo"></button>
+                  <button type="button" class="color-swatch-btn" data-color="#10b981" style="background:#10b981;" title="Esmeralda"></button>
+                  <button type="button" class="color-swatch-btn" data-color="#06b6d4" style="background:#06b6d4;" title="Ciano"></button>
+                  <button type="button" class="color-swatch-btn" data-color="#ef4444" style="background:#ef4444;" title="Vermelho"></button>
+                </div>
+
+                <button type="button" id="btn-add-new-tag" class="btn btn-secondary btn-sm" style="white-space: nowrap;">
+                  + Criar Tag
+                </button>
+              </div>
+            </div>
           </div>
 
           <div class="form-group">

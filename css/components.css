@@ -391,21 +391,21 @@
 }
 
 /* ==========================================================================
-   PROJECT CARDS & DRAGGABLE ITEMS
+   PROJECT CARDS & DRAGGABLE ITEMS (Slim & Compact Design)
    ========================================================================== */
 
 .project-card {
   background-color: var(--bg-surface-elevated);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 12px;
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
   cursor: grab;
   transition: all var(--transition-fast);
   user-select: none;
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 5px;
 }
 
 .project-card:hover {
@@ -427,9 +427,9 @@
 
 .project-card-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 6px;
 }
 
 .project-title-box {
@@ -438,7 +438,7 @@
 }
 
 .project-name {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap;
@@ -447,7 +447,7 @@
 }
 
 .project-client {
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--text-muted);
   display: flex;
   align-items: center;
@@ -456,9 +456,9 @@
 
 .project-weight-badge {
   font-family: monospace;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  padding: 2px 7px;
+  padding: 1px 6px;
   border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
@@ -469,7 +469,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
+  gap: 4px;
   flex-wrap: wrap;
 }
 
@@ -682,4 +682,126 @@ dialog::backdrop {
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+/* Tag Management in Project Modal */
+.project-tags-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 10px;
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  align-items: center;
+}
+
+.selected-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.btn-remove-selected-tag {
+  background: none;
+  border: none;
+  color: inherit;
+  opacity: 0.65;
+  cursor: pointer;
+  padding: 0;
+  font-size: 11px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-remove-selected-tag:hover {
+  opacity: 1;
+}
+
+.tag-swatches-inline {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.tag-swatches-inline .color-swatch-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+
+/* Floating Tooltip for At-Risk Projects */
+.at-risk-floating-tooltip {
+  position: fixed;
+  z-index: 9999;
+  width: 290px;
+  max-height: 380px;
+  background: rgba(14, 14, 18, 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(239, 68, 68, 0.6);
+  border-radius: var(--radius-md);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.8), 0 0 20px rgba(239, 68, 68, 0.15);
+  padding: 14px;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: auto;
+  animation: tooltipFade 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.at-risk-floating-tooltip.visible {
+  display: flex;
+}
+
+@keyframes tooltipFade {
+  from {
+    opacity: 0;
+    transform: translateX(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.at-risk-tooltip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.at-risk-tooltip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  max-height: 280px;
+  padding-right: 4px;
+}
+
+.at-risk-tooltip-item {
+  padding: 8px 10px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: all var(--transition-fast);
+}
+
+.at-risk-tooltip-item:hover {
+  background: var(--bg-surface-hover);
+  border-color: rgba(239, 68, 68, 0.4);
 }

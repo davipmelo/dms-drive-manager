@@ -777,13 +777,15 @@
   font-weight: 800;
 }
 
-/* Project Card Actions Row (Align REMOVER to the left, others to right) */
+/* Project Card Actions Row (Align REMOVER to the left, others to right - Slim & Compact) */
 .project-card-actions-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
-  margin-top: 10px;
+  gap: 4px;
+  margin-top: 3px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
   width: 100%;
 }
 
