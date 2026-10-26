@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="DMS Drive Manager - Gerenciador Inteligente de HDs, SSDs e Projetos Audiovisuais para Produtoras de Vídeo.">
+  <title>DMS Drive Manager | Produtora de Vídeo</title>
+  
+  <!-- Modern Clean Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- Core Theme & Layout Styles -->
+  <link rel="stylesheet" href="./css/theme.css">
+  <link rel="stylesheet" href="./css/layout.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/charts.css">
+</head>
+<body>
+  <div id="app">
+    
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="brand-section">
+        <button id="btn-toggle-sidebar" class="btn btn-icon" style="display:none;" title="Menu de Filtros">
+          ☰
+        </button>
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="12" x2="2" y2="12"></line>
+            <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+            <line x1="6" y1="16" x2="6.01" y2="16"></line>
+            <line x1="10" y1="16" x2="10.01" y2="16"></line>
+          </svg>
+        </div>
+        <div class="brand-info">
+          <h1>
+            DMS Drive Manager
+            <span class="brand-badge">Studio Pro</span>
+          </h1>
+          <p>Catálogo e Rastreamento de Armazenamento</p>
+        </div>
+      </div>
+
+      <!-- Global Search -->
+      <div class="header-center">
+        <div class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input 
+            type="text" 
+            id="global-search-input" 
+            class="search-input" 
+            placeholder="Buscar projetos, clientes, tags ou drives... (pressione '/' para focar)"
+            autocomplete="off"
+          />
+          <button id="search-clear-btn" class="search-clear-btn" title="Limpar busca">✕</button>
+        </div>
+      </div>
+
+      <!-- Header Actions -->
+      <div class="header-actions">
+        <!-- Real-time sync status indicator -->
+        <div id="sync-status-indicator" class="sync-status-pill offline" title="Clique para configurar o Firebase e sincronizar entre todos os membros">
+          <span class="sync-dot"></span>
+          <span id="sync-status-text">Modo Local (Offline)</span>
+        </div>
+
+        <button id="btn-import-export" class="btn btn-secondary btn-sm" title="Fazer backup ou importar dados">
+          💾 Backup / Importar
+        </button>
+
+        <button id="btn-new-drive" class="btn btn-secondary btn-sm" title="Cadastrar novo HD ou SSD">
+          <span>➕</span> Novo Drive
+        </button>
+
+        <button id="btn-new-project" class="btn btn-primary btn-sm" title="Cadastrar novo projeto">
+          <span>🎬</span> Novo Projeto
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation Bar (Views Switcher) -->
+    <nav class="view-nav">
+      <div class="nav-tabs">
+        <button class="nav-tab-btn active" data-view="drives">
+          <span>🗄️</span> Visão em Drives (Workbench)
+        </button>
+        <button class="nav-tab-btn" data-view="table">
+          <span>📋</span> Lista de Projetos (Tabela)
+        </button>
+        <button class="nav-tab-btn" data-view="analytics">
+          <span>📊</span> Armazenamento & Gráficos
+        </button>
+      </div>
+
+      <div class="quick-actions-bar">
+        <span style="font-size: 11px; color: var(--text-muted);">
+          Dica: <strong>Arraste um projeto</strong> de um drive para o outro para mover ou duplicar!
+        </span>
+      </div>
+    </nav>
+
+    <!-- Application Body -->
+    <div class="app-body">
+      
+      <!-- Filter Sidebar -->
+      <aside class="app-sidebar">
+        <div id="sidebar-filters">
+          <!-- Dynamically populated by ui-render.js -->
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="app-main">
+        
+        <!-- View 1: Drives Workbench Grid -->
+        <section id="view-drives" class="view-section active">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">
+                <span>Drives em Operação</span>
+              </h2>
+              <p class="section-subtitle">Arraste os cartões de projeto entre os drives para transferir ou criar cópias de segurança.</p>
+            </div>
+          </div>
+
+          <div id="drives-grid-container" class="drives-grid">
+            <!-- Dynamically populated by ui-render.js -->
+          </div>
+        </section>
+
+        <!-- View 2: Projects Spreadsheet Table -->
+        <section id="view-table" class="view-section">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">
+                <span>Inventário Geral de Projetos</span>
+              </h2>
+              <p class="section-subtitle">Consulta completa de todos os materiais, pesos, clientes e status de redundância.</p>
+            </div>
+          </div>
+
+          <div class="table-card">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Nome do Projeto</th>
+                    <th>Cliente</th>
+                    <th>Tamanho</th>
+                    <th>Drives Físicos</th>
+                    <th>Segurança de Backup</th>
+                    <th>Tags</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="projects-table-body">
+                  <!-- Dynamically populated by ui-render.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- View 3: Storage Analytics & Charts -->
+        <section id="view-analytics" class="view-section">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">
+                <span>Visão Geral de Armazenamento</span>
+              </h2>
+              <p class="section-subtitle">Métricas de ocupação, saúde de redundância e capacidade por dispositivo.</p>
+            </div>
+          </div>
+
+          <div id="analytics-container">
+            <!-- Dynamically populated by ui-render.js -->
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+  </div>
+
+  <!-- ==========================================================================
+       MODALS & DIALOGS
+       ========================================================================== -->
+
+  <!-- 1. DRIVE MODAL -->
+  <dialog id="drive-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="drive-modal-title">Cadastrar Novo Drive</h2>
+        <button class="btn btn-icon btn-close-modal" type="button">✕</button>
+      </div>
+      <form id="drive-form">
+        <div class="modal-body">
+          <input type="hidden" id="drive-id-input" />
+
+          <div class="form-group">
+            <label class="form-label" for="drive-name-input">Nome / Identificação do Drive *</label>
+            <input type="text" id="drive-name-input" class="form-input" placeholder="Ex: SSD SanDisk Extreme Pro 4TB" required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="drive-serial-input">Etiqueta Física / Serial</label>
+              <input type="text" id="drive-serial-input" class="form-input" placeholder="Ex: SD-4TB-01" />
+              <span class="form-hint">Código colado na carcaça do drive</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="drive-type-select">Tipo de Mídia *</label>
+              <select id="drive-type-select" class="form-select">
+                <option value="nvme">⚡ NVMe M.2 / Thunderbolt (Alta Velocidade)</option>
+                <option value="ssd">💾 SSD SATA Externo / Portátil</option>
+                <option value="hdd">🗄️ HDD Desktop 3.5" (Armazenamento)</option>
+                <option value="raid">🏢 RAID / Storage em Rede (DAS/NAS)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="drive-fs-select">Sistema de Arquivos *</label>
+              <select id="drive-fs-select" class="form-select">
+                <option value="exfat">exFAT (Compatível Mac e Windows)</option>
+                <option value="apfs">APFS (Apple Mac Nativo)</option>
+                <option value="hfs">Mac OS Extended (HFS+)</option>
+                <option value="ntfs">NTFS (Windows Nativo)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Capacidade Total *</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="number" id="drive-capacity-val" class="form-input" value="2" min="1" step="0.5" required />
+                <select id="drive-capacity-unit" class="form-select" style="width: 90px;">
+                  <option value="TB">TB</option>
+                  <option value="GB">GB</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="drive-custody-input">Custódia Física (Com quem / Onde está?) *</label>
+            <input type="text" id="drive-custody-input" class="form-input" placeholder="Ex: Davi (Ilha 01), Armário Gaveta B, Na Mochila" required />
+            <span class="form-hint">Essencial para evitar drives perdidos na produtora</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Cor da Etiqueta Visual</label>
+            <input type="hidden" id="drive-color-input" value="#06b6d4" />
+            <div class="color-swatches">
+              <button type="button" class="color-swatch-btn selected" data-color="#06b6d4" style="background:#06b6d4;" title="Ciano"></button>
+              <button type="button" class="color-swatch-btn" data-color="#3b82f6" style="background:#3b82f6;" title="Azul"></button>
+              <button type="button" class="color-swatch-btn" data-color="#8b5cf6" style="background:#8b5cf6;" title="Roxo"></button>
+              <button type="button" class="color-swatch-btn" data-color="#10b981" style="background:#10b981;" title="Esmeralda"></button>
+              <button type="button" class="color-swatch-btn" data-color="#f59e0b" style="background:#f59e0b;" title="Âmbar"></button>
+              <button type="button" class="color-swatch-btn" data-color="#f97316" style="background:#f97316;" title="Laranja"></button>
+              <button type="button" class="color-swatch-btn" data-color="#ef4444" style="background:#ef4444;" title="Vermelho"></button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="drive-notes-input">Observações Adicionais</label>
+            <textarea id="drive-notes-input" class="form-textarea" placeholder="Ex: Cabo Thunderbolt original na caixa, usado para gravações de alta taxa de quadros..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="drive-delete-btn" class="btn btn-danger" style="margin-right:auto; display:none;">
+            Excluir Drive
+          </button>
+          <button type="button" class="btn btn-secondary btn-close-modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Drive</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- 2. PROJECT MODAL -->
+  <dialog id="project-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="project-modal-title">Cadastrar Novo Projeto</h2>
+        <button class="btn btn-icon btn-close-modal" type="button">✕</button>
+      </div>
+      <form id="project-form">
+        <div class="modal-body">
+          <input type="hidden" id="project-id-input" />
+
+          <div class="form-group">
+            <label class="form-label" for="project-name-input">Nome do Projeto / Pasta *</label>
+            <input type="text" id="project-name-input" class="form-input" placeholder="Ex: Campanha Verão 2026 - Diárias 6K" required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="project-client-input">Cliente / Produção *</label>
+              <input type="text" id="project-client-input" class="form-input" placeholder="Ex: Nike, Agência Sunset" required />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Peso / Tamanho do Projeto *</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="number" id="project-size-val" class="form-input" value="450" min="1" step="1" required />
+                <select id="project-size-unit" class="form-select" style="width: 90px;">
+                  <option value="GB">GB</option>
+                  <option value="TB">TB</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Drives Onde Este Projeto Está Salvo *</label>
+            <span class="form-hint">Selecione mais de um para indicar que existe cópia de segurança (backup redundante).</span>
+            <div id="project-drives-checkboxes" style="display: flex; flex-direction: column; gap: 6px; margin-top: 6px; max-height: 180px; overflow-y: auto;">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="project-tags-input">Tags (Separadas por vírgula)</label>
+            <input type="text" id="project-tags-input" class="form-input" placeholder="Ex: 4K RAW, DaVinci, Comercial, Finalizado" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="project-notes-input">Observações / Detalhes</label>
+            <textarea id="project-notes-input" class="form-textarea" placeholder="Ex: Cartões A e B sincronizados com áudio de lapela..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="project-delete-btn" class="btn btn-danger" style="margin-right:auto; display:none;">
+            Excluir Projeto
+          </button>
+          <button type="button" class="btn btn-secondary btn-close-modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Projeto</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- 3. MOVE OR DUPLICATE PROJECT MODAL (Ação de Drag & Drop ou Menu Mover) -->
+  <dialog id="move-project-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2>Transferir ou Duplicar Projeto</h2>
+        <button class="btn btn-icon btn-close-modal" type="button">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 13px; color: var(--text-secondary);">
+          Você selecionou o projeto <strong id="move-modal-project-name" style="color:var(--text-primary);"></strong> 
+          saindo de <strong id="move-modal-source-name" style="color:var(--text-accent);"></strong>.
+        </p>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label class="form-label" for="move-modal-target-select">Selecione o Drive de Destino:</label>
+          <select id="move-modal-target-select" class="form-select">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px; display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
+          <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">
+            O que você deseja fazer?
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 12px; color: var(--text-secondary);">
+              <strong>➔ Mover (Transferência):</strong> Remove o projeto do drive de origem e transfere para o novo drive.
+            </div>
+            <div style="font-size: 12px; color: var(--text-secondary);">
+              <strong>🛡️ Duplicar (Backup):</strong> Mantém o projeto no drive de origem e adiciona ao novo drive como cópia de segurança segura.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-close-modal">Cancelar</button>
+        <button type="button" id="btn-confirm-move" class="btn btn-secondary">
+          ➔ Mover Projeto
+        </button>
+        <button type="button" id="btn-confirm-duplicate" class="btn btn-primary">
+          🛡️ Criar Backup / Duplicar
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- 4. FIREBASE SETTINGS MODAL (Sincronização em Nuvem e Contas) -->
+  <dialog id="firebase-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2>Sincronização em Nuvem (Firebase)</h2>
+        <button class="btn btn-icon btn-close-modal" type="button">✕</button>
+      </div>
+      <form id="firebase-form">
+        <div class="modal-body">
+          <div style="background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.25); border-radius: var(--radius-md); padding: 14px; font-size: 12px; line-height: 1.5; color: var(--text-secondary);">
+            <strong style="color:var(--text-accent);">Como funciona a sincronização gratuita em tempo real:</strong><br>
+            Ao conectar seu projeto gratuito no Firebase (Google Cloud), todos os membros da sua equipe podem fazer login e as alterações (arrastar projetos, atualizar pesos e drives) sincronizam instantaneamente na tela de todos.
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="fb-api-key">API Key *</label>
+            <input type="text" id="fb-api-key" class="form-input" placeholder="AIzaSy..." required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="fb-project-id">Project ID *</label>
+              <input type="text" id="fb-project-id" class="form-input" placeholder="dms-drives-produtora" required />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="fb-auth-domain">Auth Domain</label>
+              <input type="text" id="fb-auth-domain" class="form-input" placeholder="seu-projeto.firebaseapp.com" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="fb-storage-bucket">Storage Bucket</label>
+              <input type="text" id="fb-storage-bucket" class="form-input" placeholder="seu-projeto.appspot.com" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="fb-app-id">App ID</label>
+              <input type="text" id="fb-app-id" class="form-input" placeholder="1:123456789:web:abcdef" />
+            </div>
+          </div>
+          
+          <input type="hidden" id="fb-sender-id" value="" />
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="fb-disconnect-btn" class="btn btn-danger" style="margin-right:auto;">
+            Desconectar (Modo Local)
+          </button>
+          <button type="button" class="btn btn-secondary btn-close-modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar e Conectar</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- 5. IMPORT / EXPORT MODAL -->
+  <dialog id="import-export-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2>Backup & Migração de Dados</h2>
+        <button class="btn btn-icon btn-close-modal" type="button">✕</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Export Section -->
+        <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+          <h3 style="font-size: 14px; font-weight: 700; color: var(--text-primary);">Exportar Catálogo Atual</h3>
+          <p style="font-size: 12px; color: var(--text-muted);">
+            Baixe um arquivo JSON contendo todos os drives cadastrados, projetos, pesos, localizações físicas e tags para backup ou segurança.
+          </p>
+          <button type="button" id="btn-export-json" class="btn btn-secondary btn-sm" style="align-self: flex-start;">
+            ⬇️ Baixar Arquivo JSON de Backup
+          </button>
+        </div>
+
+        <!-- Import Section -->
+        <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 16px; display: flex; flex-direction: column; gap: 10px; margin-top: 14px;">
+          <h3 style="font-size: 14px; font-weight: 700; color: var(--text-primary);">Restaurar / Importar Catálogo</h3>
+          <p style="font-size: 12px; color: var(--text-muted);">
+            Suba um arquivo JSON de backup para recarregar o catálogo em outro computador.
+          </p>
+          <input type="file" id="import-file-input" accept=".json" class="form-input" style="font-size: 12px;" />
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-close-modal">Fechar</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container"></div>
+
+  <!-- Application Bootstrap Module -->
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
