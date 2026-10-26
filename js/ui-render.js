@@ -136,13 +136,13 @@ function renderSidebarStorage() {
           </div>
         </div>
 
-        <div class="metric-pill-card" style="grid-column: 1 / -1;">
+        <div class="metric-pill-card ${stats.atRiskCount > 0 ? 'has-risk' : ''}" style="grid-column: 1 / -1;">
           <div class="metric-info" style="flex:1;">
             <div style="display:flex; justify-content:space-between; align-items:baseline;">
-              <span class="metric-label">PROJETOS EM RISCO</span>
-              <span class="metric-val" style="font-size:16px; font-weight:800; color:${stats.atRiskCount > 0 ? '#ffbb00' : 'var(--text-secondary)'};">${stats.atRiskCount}</span>
+              <span class="metric-label" style="${stats.atRiskCount > 0 ? 'color: #ef4444; font-weight: 800;' : ''}">PROJETOS EM RISCO</span>
+              <span class="metric-val" style="font-size:16px; font-weight:800; color:${stats.atRiskCount > 0 ? '#ef4444' : 'var(--text-secondary)'};">${stats.atRiskCount}</span>
             </div>
-            <span class="metric-sub" style="margin-top: 4px;">
+            <span class="metric-sub" style="margin-top: 4px; ${stats.atRiskCount > 0 ? 'color: #fca5a5;' : ''}">
               ${stats.atRiskCount === 0 ? 'Nenhum projeto em risco' : `${stats.atRiskCount} ${stats.atRiskCount === 1 ? 'projeto com cópia única' : 'projetos com cópia única'} (não arquivados)`}
             </span>
           </div>
@@ -439,9 +439,19 @@ function renderDrivesWorkbench() {
 
       return `
         <div class="drive-list-card" data-drive-id="${drive.id}" style="--drive-color: ${drive.color || '#ffbb00'};">
-          <!-- Master Drive Header -->
-          <div class="drive-list-card-header">
+          <!-- Master Drive Header (Draggable for Reordering) -->
+          <div class="drive-list-card-header draggable-drive-header" draggable="true" data-drive-id="${drive.id}" title="Arraste para reordenar este drive">
             <div class="drive-list-info-block">
+              <span class="drive-drag-handle" title="Arraste para reordenar">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="8" cy="6" r="2"></circle>
+                  <circle cx="16" cy="6" r="2"></circle>
+                  <circle cx="8" cy="12" r="2"></circle>
+                  <circle cx="16" cy="12" r="2"></circle>
+                  <circle cx="8" cy="18" r="2"></circle>
+                  <circle cx="16" cy="18" r="2"></circle>
+                </svg>
+              </span>
               <span class="drive-list-color-dot" style="background: ${drive.color || '#ffbb00'};"></span>
               <div class="drive-list-title-group">
                 <div class="drive-list-title-row">
@@ -473,7 +483,11 @@ function renderDrivesWorkbench() {
                 + PROJETO
               </button>
               <button class="btn btn-secondary btn-sm btn-drive-edit" data-drive-id="${drive.id}" title="Editar Drive">
-                EDITAR
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+                <span>Editar</span>
               </button>
             </div>
           </div>
@@ -525,13 +539,16 @@ function renderDrivesWorkbench() {
                         <td>
                           <div class="subproject-actions-cell">
                             <button class="btn btn-remove-from-drive" data-project-id="${project.id}" data-drive-id="${drive.id}" title="Desvincular este projeto deste drive">
-                              REMOVER
+                              Remover do Drive
                             </button>
                             <button class="btn btn-secondary btn-sm btn-project-move" data-project-id="${project.id}" data-drive-id="${drive.id}" title="Copiar ou mover para outro drive">
-                              COPIAR OU MOVER
+                              Copiar / Mover
                             </button>
                             <button class="btn btn-secondary btn-sm btn-project-edit" data-project-id="${project.id}" title="Editar Projeto">
-                              ✎
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20h9"></path>
+                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                              </svg>
                             </button>
                           </div>
                         </td>
@@ -568,9 +585,19 @@ function renderDrivesWorkbench() {
 
       return `
         <div class="drive-card" data-drive-id="${drive.id}" style="--drive-color: ${drive.color || '#ffbb00'};">
-          <div class="drive-card-header">
+          <div class="drive-card-header draggable-drive-header" draggable="true" data-drive-id="${drive.id}" title="Arraste para reordenar este drive">
             <div class="drive-title-area">
               <div class="drive-title-row">
+                <span class="drive-drag-handle" title="Arraste para reordenar">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="8" cy="6" r="2"></circle>
+                    <circle cx="16" cy="6" r="2"></circle>
+                    <circle cx="8" cy="12" r="2"></circle>
+                    <circle cx="16" cy="12" r="2"></circle>
+                    <circle cx="8" cy="18" r="2"></circle>
+                    <circle cx="16" cy="18" r="2"></circle>
+                  </svg>
+                </span>
                 <span class="drive-name" title="${drive.name}">${drive.name}</span>
               </div>
               <div class="drive-meta-pills">
@@ -675,16 +702,19 @@ function renderProjectCard(project, currentDriveId) {
         <div class="actions-left">
           ${currentDriveId ? `
             <button class="btn btn-remove-from-drive" data-project-id="${project.id}" data-drive-id="${currentDriveId}" title="Desvincular este projeto deste drive">
-              REMOVER
+              Remover do Drive
             </button>
           ` : ''}
         </div>
         <div class="actions-right">
           <button class="btn btn-secondary btn-sm btn-project-move" data-project-id="${project.id}" data-drive-id="${currentDriveId}">
-            ${currentDriveId ? 'COPIAR OU MOVER' : 'VINCULAR A DRIVE'}
+            ${currentDriveId ? 'Copiar / Mover' : 'Vincular a Drive'}
           </button>
           <button class="btn btn-secondary btn-sm btn-project-edit" data-project-id="${project.id}" title="Editar Projeto">
-            ✎
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
           </button>
         </div>
       </div>
@@ -721,14 +751,17 @@ function renderProjectListRow(project, currentDriveId) {
       <div class="project-list-actions">
         ${currentDriveId ? `
           <button class="btn btn-remove-from-drive" data-project-id="${project.id}" data-drive-id="${currentDriveId}" title="Remover este projeto deste drive">
-            REMOVER
+            Remover do Drive
           </button>
         ` : ''}
         <button class="btn btn-secondary btn-sm btn-project-move" data-project-id="${project.id}" data-drive-id="${currentDriveId}" title="Copiar ou mover para outro drive">
-          ${currentDriveId ? 'COPIAR OU MOVER' : 'VINCULAR A DRIVE'}
+          ${currentDriveId ? 'Copiar / Mover' : 'Vincular a Drive'}
         </button>
         <button class="btn btn-secondary btn-sm btn-project-edit" data-project-id="${project.id}" title="Editar Projeto">
-          ✎
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+          </svg>
         </button>
       </div>
     </div>
@@ -829,7 +862,13 @@ function renderProjectsTable() {
         </td>
         <td>
           <div style="display:flex; gap:6px; align-items:center;">
-            <button class="btn btn-secondary btn-sm btn-table-edit" data-project-id="${proj.id}" title="Editar Projeto">Editar</button>
+            <button class="btn btn-secondary btn-sm btn-table-edit" data-project-id="${proj.id}" title="Editar Projeto">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+              <span>Editar</span>
+            </button>
             <button class="btn btn-secondary btn-sm btn-table-move" data-project-id="${proj.id}" title="Mover ou Duplicar Projeto">Mover / Duplicar</button>
             <button class="btn btn-danger btn-sm btn-table-delete" data-project-id="${proj.id}" title="Excluir Permanentemente do Catálogo" style="padding: 4px 8px;">✕ Excluir</button>
           </div>

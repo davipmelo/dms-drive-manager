@@ -115,9 +115,9 @@
 }
 
 .pill-hd {
-  background: rgba(255, 255, 255, 0.08);
-  color: #e4e4e7;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.35);
 }
 
 .pill-ssd {
@@ -203,7 +203,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background-color: var(--drive-color, var(--accent-cyan));
+  background-color: var(--drive-color, var(--accent-yellow));
   border-top-left-radius: var(--radius-lg);
   border-top-right-radius: var(--radius-lg);
 }
@@ -214,11 +214,52 @@
   transform: translateY(-2px);
 }
 
-/* Drag Over Target Styling */
+/* Drag Over Target Styling (Project drop) */
 .drive-card.drag-target-over {
   border-color: #ffbb00;
   box-shadow: 0 0 0 1px #ffbb00;
   background-color: rgba(255, 187, 0, 0.02);
+}
+
+/* Drive Reordering Drag Styles */
+.draggable-drive-header {
+  cursor: grab;
+  user-select: none;
+}
+
+.draggable-drive-header:active {
+  cursor: grabbing;
+}
+
+.drive-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  cursor: grab;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.drive-drag-handle:hover {
+  color: #ffbb00;
+  background-color: rgba(255, 187, 0, 0.12);
+}
+
+.drive-card.is-drive-dragging,
+.drive-list-card.is-drive-dragging {
+  opacity: 0.35;
+  transform: scale(0.98);
+}
+
+.drive-card.drag-drive-reorder-over,
+.drive-list-card.drag-drive-reorder-over {
+  border-color: #ffbb00 !important;
+  box-shadow: 0 0 0 2px #ffbb00, 0 8px 24px rgba(255, 187, 0, 0.25) !important;
+  transform: translateY(-2px);
 }
 
 .drive-card-header {
@@ -380,7 +421,7 @@
 
 .project-card.is-dragging {
   opacity: 0.4;
-  border: 1px dashed var(--accent-cyan);
+  border: 1px dashed var(--accent-yellow);
   background: var(--bg-surface-active);
 }
 
@@ -552,8 +593,8 @@ dialog::backdrop {
 
 .form-input:focus, .form-select:focus, .form-textarea:focus {
   outline: none;
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+  border-color: var(--accent-yellow);
+  box-shadow: 0 0 0 3px rgba(255, 187, 0, 0.15);
 }
 
 .form-textarea {

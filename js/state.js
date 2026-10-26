@@ -200,6 +200,17 @@ class StateStore {
     this.notify();
   }
 
+  reorderDrives(sourceDriveId, targetDriveId) {
+    if (!sourceDriveId || !targetDriveId || sourceDriveId === targetDriveId) return;
+    const sourceIndex = this.drives.findIndex(d => d.id === sourceDriveId);
+    const targetIndex = this.drives.findIndex(d => d.id === targetDriveId);
+    if (sourceIndex === -1 || targetIndex === -1) return;
+
+    const [movedDrive] = this.drives.splice(sourceIndex, 1);
+    this.drives.splice(targetIndex, 0, movedDrive);
+    this.notify();
+  }
+
   // Project CRUD
   addProject(projectData) {
     const newProject = {
