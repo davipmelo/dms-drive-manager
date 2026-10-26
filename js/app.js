@@ -59,23 +59,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderApp();
 });
 
-// Setup Top Tabs Navigation
+// Setup Navigation & View Switching
 function setupNavigation() {
-  const tabs = document.querySelectorAll('.nav-tab-btn');
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      const targetView = tab.dataset.view;
-      if (!targetView) return;
+  document.addEventListener('click', (e) => {
+    const tab = e.target.closest('.nav-tab-btn');
+    if (!tab) return;
+    const targetView = tab.dataset.view;
+    if (!targetView) return;
 
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-
-      document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
-      const activeSection = document.getElementById(`view-${targetView}`);
-      if (activeSection) activeSection.classList.add('active');
-
-      state.setActiveView(targetView);
-    });
+    state.setActiveView(targetView);
   });
 
   // Mobile sidebar toggle button

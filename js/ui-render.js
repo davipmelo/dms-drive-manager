@@ -17,6 +17,10 @@ export function renderApp() {
   renderSidebarStorage();
   renderFiltersPopover();
 
+  document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+  const activeSection = document.getElementById(`view-${state.activeView}`);
+  if (activeSection) activeSection.classList.add('active');
+
   if (state.activeView === 'drives') {
     renderDrivesWorkbench();
   } else if (state.activeView === 'table') {
@@ -60,7 +64,42 @@ function renderSidebarStorage() {
   sidebar.innerHTML = `
     <div class="sidebar-dashboard">
       
-      <!-- Sidebar Header -->
+      <!-- 1. Navigation Section in Sidebar -->
+      <div class="sidebar-nav-section">
+        <div class="sidebar-header">
+          <div class="sidebar-header-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+            <span>Navegação</span>
+          </div>
+        </div>
+
+        <div class="sidebar-nav-tabs">
+          <button type="button" class="nav-tab-btn ${state.activeView === 'drives' ? 'active' : ''}" data-view="drives" title="Visualizar Drives">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+              <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+              <line x1="6" y1="6" x2="6.01" y2="6"></line>
+              <line x1="6" y1="18" x2="6.01" y2="18"></line>
+            </svg>
+            <span>Drives</span>
+          </button>
+          <button type="button" class="nav-tab-btn ${state.activeView === 'table' ? 'active' : ''}" data-view="table" title="Visualizar Projetos">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span>Projetos</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. Storage Header -->
       <div class="sidebar-header">
         <div class="sidebar-header-title">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
