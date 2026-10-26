@@ -1,6 +1,6 @@
-# 🎬 DMS Drive Manager — Studio Pro
+# 🎬 DM`S DRIVE MANAGER
 
-> Sistema web moderno de catálogo, rastreamento físico e gestão de redundância de HDs e SSDs para produtoras audiovisuais.
+> Sistema web moderno e limpo de catálogo e gestão de redundância de HDs e SSDs para produtoras audiovisuais.
 
 ![Dark Theme](https://img.shields.io/badge/Theme-DaVinci%20Dark-161922?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Pronto%20para%20GitHub%20Pages-06b6d4?style=for-the-badge)
@@ -10,42 +10,42 @@
 
 ## 💡 O Que é o Projeto?
 
-O **DMS Drive Manager** foi desenhado especificamente para resolver o gargalo de produtoras de vídeo que lidam com dezenas de HDs e SSDs de projetos em alta rotatividade.
+O **DM`S DRIVE MANAGER** foi desenhado especificamente para resolver o gargalo de produtoras de vídeo que lidam com dezenas de HDs e SSDs de projetos em alta rotatividade.
 
-Em vez de precisar plugar drive por drive no computador para saber o que está gravado ou onde foi parar aquele material bruto, o sistema oferece um painel central visual, com drag-and-drop, métricas de capacidade e cálculo automático de segurança de dados.
+Em vez de precisar plugar drive por drive no computador para saber o que está gravado, o sistema oferece um painel central visual, com drag-and-drop, métricas de capacidade e cálculo automático de segurança de dados.
 
 ---
 
 ## ⚡ Principais Funcionalidades
 
 ### 1. 🗄️ Workbench Visual com Drag & Drop
-- Visualize todos os seus HDs e SSDs em cartões intuitivos com barras de capacidade dinâmica (cores dinâmicas para normal, aviso >80% e crítico >92%).
+- Visualize todos os seus HDs e SSDs em cartões intuitivos com barras de capacidade dinâmica.
 - **Arraste e solte** cartões de projetos entre os drives para **Transferir (Mover)** ou **Duplicar (Criar Backup)**.
 - Menus rápidos para quem prefere não arrastar: botão direto *"Mover / Duplicar ➔"*.
 
 ### 2. 🛡️ Alerta Automático de Cópia Única (Regra de Backup 3-2-1)
-- **`⚠️ Cópia Única (Risco)`**: O sistema identifica automaticamente projetos que estão salvos em apenas 1 drive físico e acende um badge de alerta.
+- **`⚠️ Cópia Única (Risco)`**: O sistema identifica automaticamente projetos salvos em apenas 1 drive físico e acende um badge de alerta.
 - **`🛡️ 2+ Cópias (Seguro)`**: Mostra quais projetos já possuem backup replicado em outros discos.
 
-### 3. 📍 Rastreamento de Custódia Física ("Com quem está o drive?")
-- Registro instantâneo da localização física de cada drive (ex: *"Davi (Ilha 01)"*, *"Armário Central - Gaveta B"*, *"Mochila de Gravação"*, *"Lucas (Colorista Remoto)"*).
-- Clique direto na etiqueta de custódia para atualizar a localização em 2 segundos.
-
-### 4. 💾 Compatibilidade de Formatos
-- Suporte a tags de sistema de arquivos: **exFAT** (universal Mac/Win), **APFS** (Apple nativo), **HFS+** e **NTFS** (Windows). Evita enviar um HD com formato incompatível para uma ilha de edição.
-
-### 5. 🔍 Busca Instantânea e Filtros Avançados
-- Pressione `/` no teclado para buscar instantaneamente por nome do projeto, cliente, tags ou drives.
-- Filtre por **Segurança** (projetos sem backup), **Tipo de Drive** (NVMe, SSD, HDD, RAID), **Localização** e **Cliente**.
-
-### 6. 📊 Métricas & Gráficos Intuitivos de Storage
-- Gráfico Donut SVG interativo com porcentagem total ocupada x livre em todo o estúdio.
-- Ocupação detalhada drive por drive.
+### 3. 📊 Dashboard de Armazenamento Sempre Visível na Sidebar
+- Gráfico Donut SVG compacto com porcentagem total ocupada x livre em todo o estúdio.
+- Ocupação detalhada por HD e SSD em tempo real ao lado das suas tarefas diárias.
 - Indicador de saúde geral do backup da produtora.
+
+### 4. 🌪️ Filtros Sob Demanda no Workbench
+- Filtros elegantes através de botão flutuante no canto superior do Workbench, liberando a interface.
+- Filtre por **Segurança** (projetos sem backup), **Tipo de Mídia** (HD e SSD) e **Cliente**.
+
+### 5. 📦 Preservação de Projetos ao Remover Drives
+- Remover um drive mantém todos os projetos existentes intactos no catálogo (identificados como desvinculados até que sejam alocados a um novo drive).
+- Excluir um projeto na tabela de projetos o remove instantaneamente de todos os drives.
+
+### 6. 💾 Compatibilidade de Formatos
+- Suporte a tags de sistema de arquivos: **exFAT** (universal Mac/Win), **APFS** (Apple nativo), **HFS+** e **NTFS** (Windows).
 
 ### 7. ☁️ Sincronização em Tempo Real (Firebase Gratuito) + Modo Local
 - Funciona **100% offline / local** imediatamente sem precisar configurar nada (usando LocalStorage).
-- Possui modal de configuração rápida para conectar ao **Firebase Firestore**: sincroniza em tempo real entre todas as máquinas da produtora (até 10+ editores) no plano gratuito do Google.
+- Conexão opcional com o **Firebase Firestore** para sincronização em tempo real entre computadores da equipe.
 
 ---
 

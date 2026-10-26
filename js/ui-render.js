@@ -1,6 +1,6 @@
 /* ==========================================================================
-   DMS DRIVE MANAGER - UI RENDER ENGINE
-   Dynamic DOM rendering for drives workbench, projects table, and analytics
+   DM`S DRIVE MANAGER - UI RENDER ENGINE
+   Dynamic DOM rendering for drives workbench, projects table, and storage dashboard
    ========================================================================== */
 
 import { state } from './state.js';
@@ -8,21 +8,19 @@ import {
   openDriveModal, 
   openProjectModal, 
   openMoveProjectModal, 
-  openCustodyQuickEdit,
   showToast 
 } from './modals.js';
 
-// Entry point: re-renders current view
+// Entry point: re-renders current view & sidebar
 export function renderApp() {
   renderHeaderStatus();
-  renderSidebarFilters();
+  renderSidebarStorage();
+  renderFiltersPopover();
 
   if (state.activeView === 'drives') {
     renderDrivesWorkbench();
   } else if (state.activeView === 'table') {
     renderProjectsTable();
-  } else if (state.activeView === 'analytics') {
-    renderStorageAnalytics();
   }
 }
 
@@ -47,127 +45,323 @@ function renderHeaderStatus() {
   }
 }
 
-// 2. Sidebar Filters
-function renderSidebarFilters() {
-  const sidebar = document.getElementById('sidebar-filters');
+// 2. Storage & Health Dashboard Sidebar (Always Visible)
+function renderSidebarStorage() {
+  const sidebar = document.getElementById('sidebar-storage-dashboard');
   if (!sidebar) return;
 
   const stats = state.calculateGlobalStats();
-  const clients = state.getClientsList();
-  const custodies = state.getCustodiesList();
+
+  // Mini Donut calculation
+  const radius = 34;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (stats.globalUsagePct / 100) * circumference;
 
   sidebar.innerHTML = `
-    <!-- Redundancy Filter -->
-    <div class="filter-group">
-      <div class="filter-group-title">
-        <span>Segurança de Dados</span>
+    <div class="sidebar-dashboard">
+      
+      <!-- Sidebar Header -->
+      <div class="sidebar-header">
+        <div class="sidebar-header-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Armazenamento</span>
+        </div>
+        <span class="sidebar-badge">${stats.totalDrives} Drives</span>
       </div>
-      <div class="filter-list">
-        <button class="filter-item-btn ${state.filters.redundancy === 'all' ? 'active' : ''}" data-filter-type="redundancy" data-filter-val="all">
-          <span>Todos os Projetos</span>
-          <span class="filter-pill-count">${stats.totalProjects}</span>
-        </button>
-        <button class="filter-item-btn ${state.filters.redundancy === 'single' ? 'active' : ''}" data-filter-type="redundancy" data-filter-val="single">
-          <span style="display:flex; align-items:center; gap:6px;">
-            <span style="color:var(--accent-rose);">⚠️</span> Cópia Única (Risco)
-          </span>
-          <span class="filter-pill-count">${stats.singleCopyCount}</span>
-        </button>
-        <button class="filter-item-btn ${state.filters.redundancy === 'safe' ? 'active' : ''}" data-filter-type="redundancy" data-filter-val="safe">
-          <span style="display:flex; align-items:center; gap:6px;">
-            <span style="color:var(--accent-emerald);">🛡️</span> Com Backup (2+)
-          </span>
-          <span class="filter-pill-count">${stats.safeBackupCount}</span>
-        </button>
-      </div>
-    </div>
 
-    <!-- Drive Type Filter -->
-    <div class="filter-group">
-      <div class="filter-group-title">
-        <span>Tipo de Drive</span>
-      </div>
-      <div class="filter-list">
-        <button class="filter-item-btn ${state.filters.driveType === 'all' ? 'active' : ''}" data-filter-type="driveType" data-filter-val="all">
-          <span>Todos os Tipos</span>
-          <span class="filter-pill-count">${stats.totalDrives}</span>
-        </button>
-        <button class="filter-item-btn ${state.filters.driveType === 'nvme' ? 'active' : ''}" data-filter-type="driveType" data-filter-val="nvme">
-          <span>⚡ NVMe M.2</span>
-          <span class="filter-pill-count">${state.drives.filter(d => d.type === 'nvme').length}</span>
-        </button>
-        <button class="filter-item-btn ${state.filters.driveType === 'ssd' ? 'active' : ''}" data-filter-type="driveType" data-filter-val="ssd">
-          <span>💾 SSD Externo</span>
-          <span class="filter-pill-count">${state.drives.filter(d => d.type === 'ssd').length}</span>
-        </button>
-        <button class="filter-item-btn ${state.filters.driveType === 'hdd' ? 'active' : ''}" data-filter-type="driveType" data-filter-val="hdd">
-          <span>🗄️ HDD Desktop</span>
-          <span class="filter-pill-count">${state.drives.filter(d => d.type === 'hdd').length}</span>
-        </button>
-        <button class="filter-item-btn ${state.filters.driveType === 'raid' ? 'active' : ''}" data-filter-type="driveType" data-filter-val="raid">
-          <span>🏢 RAID / Storage</span>
-          <span class="filter-pill-count">${state.drives.filter(d => d.type === 'raid').length}</span>
-        </button>
-      </div>
-    </div>
+      <!-- Global Storage Meter Card -->
+      <div class="sidebar-card storage-gauge-card">
+        <div class="storage-gauge-inner">
+          <div class="gauge-donut-wrapper">
+            <svg viewBox="0 0 90 90" class="gauge-donut-svg">
+              <circle cx="45" cy="45" r="${radius}" fill="transparent" stroke="var(--bg-surface-elevated)" stroke-width="8" />
+              <circle cx="45" cy="45" r="${radius}" fill="transparent" stroke="var(--accent-cyan)" stroke-width="8"
+                stroke-dasharray="${circumference}"
+                stroke-dashoffset="${strokeDashoffset}"
+                stroke-linecap="round"
+                transform="rotate(-90 45 45)"
+                style="transition: stroke-dashoffset 0.8s ease;" />
+            </svg>
+            <div class="gauge-donut-center">
+              <span class="gauge-pct">${stats.globalUsagePct}%</span>
+              <span class="gauge-label">Uso</span>
+            </div>
+          </div>
 
-    <!-- Custody Filter -->
-    <div class="filter-group">
-      <div class="filter-group-title">
-        <span>Custódia / Onde Está</span>
+          <div class="gauge-stats-column">
+            <div class="gauge-stat-item">
+              <span class="stat-dot" style="background: var(--accent-cyan);"></span>
+              <div>
+                <div class="gauge-stat-label">Espaço Usado</div>
+                <div class="gauge-stat-val">${state.constructor.formatGB(stats.totalPhysicalUsedGB)}</div>
+              </div>
+            </div>
+            <div class="gauge-stat-item">
+              <span class="stat-dot" style="background: var(--accent-emerald);"></span>
+              <div>
+                <div class="gauge-stat-label">Espaço Livre</div>
+                <div class="gauge-stat-val">${state.constructor.formatGB(stats.totalFreeGB)}</div>
+              </div>
+            </div>
+            <div class="gauge-stat-item">
+              <span class="stat-dot" style="background: var(--text-muted);"></span>
+              <div>
+                <div class="gauge-stat-label">Capacidade Total</div>
+                <div class="gauge-stat-val">${state.constructor.formatGB(stats.totalStorageGB)}</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="filter-list">
-        <button class="filter-item-btn ${state.filters.custody === 'all' ? 'active' : ''}" data-filter-type="custody" data-filter-val="all">
-          <span>Todas Localizações</span>
-        </button>
-        ${custodies.map(cust => `
-          <button class="filter-item-btn ${state.filters.custody === cust ? 'active' : ''}" data-filter-type="custody" data-filter-val="${cust}">
-            <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">📍 ${cust}</span>
-          </button>
-        `).join('')}
-      </div>
-    </div>
 
-    <!-- Client Filter -->
-    <div class="filter-group">
-      <div class="filter-group-title">
-        <span>Clientes</span>
+      <!-- Quick Metrics Grid -->
+      <div class="sidebar-metrics-grid">
+        <div class="metric-pill-card">
+          <div class="metric-icon">🗄️</div>
+          <div class="metric-info">
+            <span class="metric-label">Mídias Físicas</span>
+            <span class="metric-val">${stats.totalDrives}</span>
+            <span class="metric-sub">${stats.hdCount} HD • ${stats.ssdCount} SSD</span>
+          </div>
+        </div>
+
+        <div class="metric-pill-card">
+          <div class="metric-icon">🎬</div>
+          <div class="metric-info">
+            <span class="metric-label">Projetos Totais</span>
+            <span class="metric-val">${stats.totalProjects}</span>
+            <span class="metric-sub">${stats.unassignedProjectsCount > 0 ? `<span style="color:var(--accent-amber); font-weight:700;">${stats.unassignedProjectsCount} sem drive</span>` : 'Todos vinculados'}</span>
+          </div>
+        </div>
+
+        <div class="metric-pill-card" style="grid-column: 1 / -1;">
+          <div class="metric-icon">${stats.safeBackupPct < 60 ? '⚠️' : '🛡️'}</div>
+          <div class="metric-info" style="flex:1;">
+            <div style="display:flex; justify-content:space-between; align-items:baseline;">
+              <span class="metric-label">Saúde de Backup</span>
+              <span class="metric-val" style="font-size:15px; color:${stats.safeBackupPct < 60 ? 'var(--accent-rose)' : 'var(--accent-emerald)'}">${stats.safeBackupPct}%</span>
+            </div>
+            <div class="sidebar-mini-bar-track">
+              <div class="sidebar-mini-bar-fill" style="width:${stats.safeBackupPct}%; background:${stats.safeBackupPct < 60 ? 'var(--accent-rose)' : 'var(--accent-emerald)'};"></div>
+            </div>
+            <span class="metric-sub">${stats.safeBackupCount} protegidos (2+ cópias) • ${stats.singleCopyCount} em risco</span>
+          </div>
+        </div>
       </div>
-      <div class="filter-list">
-        <button class="filter-item-btn ${state.filters.client === 'all' ? 'active' : ''}" data-filter-type="client" data-filter-val="all">
-          <span>Todos os Clientes</span>
-        </button>
-        ${clients.map(client => `
-          <button class="filter-item-btn ${state.filters.client === client ? 'active' : ''}" data-filter-type="client" data-filter-val="${client}">
-            <span>🎬 ${client}</span>
-          </button>
-        `).join('')}
+
+      <!-- Drives Storage List -->
+      <div class="sidebar-drives-section">
+        <div class="sidebar-section-title">
+          <span>Dispositivos de Mídia</span>
+          <span style="font-size:10px; color:var(--text-muted);">${state.drives.length}</span>
+        </div>
+
+        <div class="sidebar-drives-list">
+          ${state.drives.length === 0 ? `
+            <div style="font-size:12px; color:var(--text-muted); text-align:center; padding:16px;">
+              Nenhum drive cadastrado.
+            </div>
+          ` : state.drives.map(drive => {
+            const usage = state.calculateDriveUsage(drive.id);
+            const isSSD = drive.type === 'ssd';
+            const barClass = usage.isCritical ? 'critical' : usage.isWarning ? 'warning' : '';
+            return `
+              <div class="sidebar-drive-item" data-drive-id="${drive.id}">
+                <div class="sidebar-drive-header">
+                  <div class="sidebar-drive-name-row">
+                    <span class="drive-color-dot" style="background:${drive.color || '#06b6d4'};"></span>
+                    <span class="sidebar-drive-name" title="${drive.name}">${drive.name}</span>
+                  </div>
+                  <span class="pill ${isSSD ? 'pill-ssd' : 'pill-hd'}" style="font-size:10px; padding:1px 6px;">
+                    ${isSSD ? 'SSD' : 'HD'}
+                  </span>
+                </div>
+
+                <div class="sidebar-drive-bar-track">
+                  <div class="sidebar-drive-bar-fill ${barClass}" style="width: ${usage.pct}%;"></div>
+                </div>
+
+                <div class="sidebar-drive-meta">
+                  <span>${state.constructor.formatGB(usage.usedGB)} / ${state.constructor.formatGB(usage.totalGB)}</span>
+                  <span style="font-weight:600; color:${usage.isCritical ? 'var(--accent-rose)' : 'var(--text-secondary)'};">${usage.pct}%</span>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
       </div>
+
     </div>
   `;
 
-  // Attach filter click handlers
-  sidebar.querySelectorAll('.filter-item-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const type = btn.dataset.filterType;
-      const val = btn.dataset.filterVal;
-      state.setFilter(type, val);
+  // Click on a drive in sidebar scrolls to it in the workbench
+  sidebar.querySelectorAll('.sidebar-drive-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const driveCard = document.querySelector(`.drive-card[data-drive-id="${item.dataset.driveId}"]`);
+      if (driveCard) {
+        driveCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        driveCard.classList.add('drag-target-over');
+        setTimeout(() => driveCard.classList.remove('drag-target-over'), 1200);
+      }
     });
   });
 }
 
-// 3. Drives Workbench View (Drag & Drop Interface)
+// 3. Floating Filters Popover (Triggered by the button in Workbench)
+function renderFiltersPopover() {
+  const popover = document.getElementById('filters-menu-popover');
+  const countBadge = document.getElementById('active-filters-count');
+  const toggleBtn = document.getElementById('btn-toggle-filters-menu');
+  if (!popover || !countBadge || !toggleBtn) return;
+
+  const stats = state.calculateGlobalStats();
+  const clients = state.getClientsList();
+
+  // Calculate active filters count
+  let activeCount = 0;
+  if (state.filters.redundancy !== 'all') activeCount++;
+  if (state.filters.driveType !== 'all') activeCount++;
+  if (state.filters.client !== 'all') activeCount++;
+  if (state.filters.tag !== 'all') activeCount++;
+
+  if (activeCount > 0) {
+    countBadge.textContent = activeCount;
+    countBadge.style.display = 'inline-flex';
+    toggleBtn.classList.add('has-active-filters');
+  } else {
+    countBadge.style.display = 'none';
+    toggleBtn.classList.remove('has-active-filters');
+  }
+
+  popover.innerHTML = `
+    <div class="popover-header">
+      <div style="display:flex; align-items:center; gap:6px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+        </svg>
+        <strong>Filtrar Workbench</strong>
+      </div>
+      ${activeCount > 0 ? `
+        <button type="button" class="btn-clear-filters" id="btn-popover-clear">
+          Limpar Filtros
+        </button>
+      ` : ''}
+    </div>
+
+    <div class="popover-body">
+      <!-- 1. Redundancy / Security Filter -->
+      <div class="popover-group">
+        <div class="popover-group-label">Segurança de Dados</div>
+        <div class="popover-chips-row">
+          <button class="filter-chip ${state.filters.redundancy === 'all' ? 'active' : ''}" data-filter-type="redundancy" data-filter-val="all">
+            Todos (${stats.totalProjects})
+          </button>
+          <button class="filter-chip ${state.filters.redundancy === 'single' ? 'active' : ''}" data-filter-type="redundancy" data-filter-val="single">
+            ⚠️ Cópia Única (${stats.singleCopyCount})
+          </button>
+          <button class="filter-chip ${state.filters.redundancy === 'safe' ? 'active' : ''}" data-filter-type="redundancy" data-filter-val="safe">
+            🛡️ Com Backup (${stats.safeBackupCount})
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. Drive Type Filter (HD or SSD only) -->
+      <div class="popover-group">
+        <div class="popover-group-label">Tipo de Mídia</div>
+        <div class="popover-chips-row">
+          <button class="filter-chip ${state.filters.driveType === 'all' ? 'active' : ''}" data-filter-type="driveType" data-filter-val="all">
+            Todos (${stats.totalDrives})
+          </button>
+          <button class="filter-chip ${state.filters.driveType === 'hd' ? 'active' : ''}" data-filter-type="driveType" data-filter-val="hd">
+            🗄️ HD (${stats.hdCount})
+          </button>
+          <button class="filter-chip ${state.filters.driveType === 'ssd' ? 'active' : ''}" data-filter-type="driveType" data-filter-val="ssd">
+            ⚡ SSD (${stats.ssdCount})
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. Client Filter -->
+      <div class="popover-group">
+        <div class="popover-group-label">Clientes / Produções</div>
+        <div class="popover-chips-row">
+          <button class="filter-chip ${state.filters.client === 'all' ? 'active' : ''}" data-filter-type="client" data-filter-val="all">
+            Todos os Clientes
+          </button>
+          ${clients.map(client => `
+            <button class="filter-chip ${state.filters.client === client ? 'active' : ''}" data-filter-type="client" data-filter-val="${client}">
+              🎬 ${client}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Attach filter chip event handlers
+  popover.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const type = chip.dataset.filterType;
+      const val = chip.dataset.filterVal;
+      state.setFilter(type, val);
+    });
+  });
+
+  const clearBtn = popover.querySelector('#btn-popover-clear');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      state.resetFilters();
+    });
+  }
+}
+
+// 4. Drives Workbench View (Drag & Drop Interface)
 function renderDrivesWorkbench() {
   const container = document.getElementById('drives-grid-container');
+  const unassignedContainer = document.getElementById('unassigned-projects-container');
   if (!container) return;
 
   const filteredProjects = state.getFilteredProjects();
   const filteredProjectIds = new Set(filteredProjects.map(p => p.id));
 
-  // Filter drives if driveType or custody filter is active
+  // Projects not assigned to any drive
+  const unassignedProjects = state.projects.filter(p => !p.drives || p.drives.length === 0);
+  const matchingUnassigned = unassignedProjects.filter(p => filteredProjectIds.has(p.id));
+
+  // Render Unassigned Projects Banner if any exist
+  if (unassignedContainer) {
+    if (matchingUnassigned.length > 0) {
+      unassignedContainer.style.display = 'block';
+      unassignedContainer.innerHTML = `
+        <div class="unassigned-banner">
+          <div class="unassigned-banner-header">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:16px;">⚠️</span>
+              <div>
+                <strong style="color:var(--text-primary); font-size:13px;">Projetos Sem Drive Vinculado (${matchingUnassigned.length})</strong>
+                <p style="font-size:11px; color:var(--text-muted); margin-top:2px;">Estes projetos continuam salvos no catálogo, mas não estão alocados em nenhum HD/SSD. Arraste-os para um drive abaixo para vincular!</p>
+              </div>
+            </div>
+          </div>
+          <div class="unassigned-cards-grid">
+            ${matchingUnassigned.map(project => renderProjectCard(project, '')).join('')}
+          </div>
+        </div>
+      `;
+      attachProjectCardListeners(unassignedContainer);
+    } else {
+      unassignedContainer.style.display = 'none';
+      unassignedContainer.innerHTML = '';
+    }
+  }
+
+  // Filter drives if driveType filter is active
   const visibleDrives = state.drives.filter(drive => {
     if (state.filters.driveType !== 'all' && drive.type !== state.filters.driveType) return false;
-    if (state.filters.custody !== 'all' && drive.custody !== state.filters.custody) return false;
     return true;
   });
 
@@ -185,12 +379,13 @@ function renderDrivesWorkbench() {
 
   container.innerHTML = visibleDrives.map(drive => {
     const usage = state.calculateDriveUsage(drive.id);
-    const driveProjects = state.projects.filter(p => p.drives.includes(drive.id));
+    const driveProjects = state.projects.filter(p => (p.drives || []).includes(drive.id));
     const matchingProjects = driveProjects.filter(p => filteredProjectIds.has(p.id));
 
-    // Type badge class
-    const typeClass = `pill-${drive.type}`;
-    const typeLabel = drive.type === 'nvme' ? 'NVMe M.2' : drive.type === 'ssd' ? 'SSD' : drive.type === 'raid' ? 'RAID' : 'HDD 3.5"';
+    // Type badge (HD or SSD)
+    const isSSD = drive.type === 'ssd';
+    const typeClass = isSSD ? 'pill-ssd' : 'pill-hd';
+    const typeLabel = isSSD ? '⚡ SSD' : '🗄️ HD';
 
     // File system class
     const fsClass = `pill-fs-${drive.fileSystem}`;
@@ -202,12 +397,11 @@ function renderDrivesWorkbench() {
     return `
       <div class="drive-card" data-drive-id="${drive.id}" style="--drive-color: ${drive.color || '#06b6d4'};">
         
-        <!-- Header -->
+        <!-- Header (Clean without serial and without custody) -->
         <div class="drive-card-header">
           <div class="drive-title-area">
             <div class="drive-title-row">
               <span class="drive-name" title="${drive.name}">${drive.name}</span>
-              <span class="drive-serial">${drive.serial}</span>
             </div>
             <div class="drive-meta-pills">
               <span class="pill ${typeClass}">${typeLabel}</span>
@@ -239,14 +433,6 @@ function renderDrivesWorkbench() {
           </div>
         </div>
 
-        <!-- Custody Bar -->
-        <div class="drive-custody-row">
-          <span style="color:var(--text-muted);">Custódia física:</span>
-          <span class="custody-badge-interactive btn-quick-custody" data-drive-id="${drive.id}" title="Clique para alterar a localização">
-            📍 <strong>${drive.custody}</strong> ✎
-          </span>
-        </div>
-
         <!-- Droppable Projects List -->
         <div class="drive-projects-list ${matchingProjects.length === 0 ? 'empty-state' : ''}" data-drive-id="${drive.id}">
           ${matchingProjects.length > 0 ? matchingProjects.map(project => renderProjectCard(project, drive.id)).join('') : `
@@ -275,26 +461,24 @@ function renderDrivesWorkbench() {
     });
   });
 
-  container.querySelectorAll('.btn-quick-custody').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const drive = state.drives.find(d => d.id === btn.dataset.driveId);
-      if (drive) openCustodyQuickEdit(drive);
-    });
-  });
-
   // Attach Project Card Actions inside drives
   attachProjectCardListeners(container);
 }
 
 // Render Individual Project Card
 function renderProjectCard(project, currentDriveId) {
-  const isSafe = project.drives.length >= 2;
-  const backupPill = isSafe
-    ? `<span class="pill pill-backup-safe" title="Salvo em ${project.drives.length} drives: seguro!">🛡️ ${project.drives.length} Cópias</span>`
-    : `<span class="pill pill-backup-danger" title="Apenas 1 cópia! Risco se o drive falhar.">⚠️ Cópia Única</span>`;
+  const copies = (project.drives || []).length;
+  let backupPill = '';
+  if (copies === 0) {
+    backupPill = `<span class="pill pill-unassigned" title="Projeto não está em nenhum drive!">⚠️ Sem Drive</span>`;
+  } else if (copies >= 2) {
+    backupPill = `<span class="pill pill-backup-safe" title="Salvo em ${copies} drives: backup seguro!">🛡️ ${copies} Cópias</span>`;
+  } else {
+    backupPill = `<span class="pill pill-backup-danger" title="Apenas 1 cópia! Risco se o drive falhar.">⚠️ Cópia Única</span>`;
+  }
 
   return `
-    <div class="project-card" draggable="true" data-project-id="${project.id}" data-drive-id="${currentDriveId}">
+    <div class="project-card ${copies === 0 ? 'is-unassigned' : ''}" draggable="true" data-project-id="${project.id}" data-drive-id="${currentDriveId}">
       <div class="project-card-header">
         <div class="project-title-box">
           <div class="project-name" title="${project.name}">${project.name}</div>
@@ -313,7 +497,7 @@ function renderProjectCard(project, currentDriveId) {
 
       <div style="display:flex; justify-content:flex-end; gap:4px; margin-top:4px;">
         <button class="btn btn-secondary btn-sm btn-project-move" data-project-id="${project.id}" data-drive-id="${currentDriveId}" style="padding: 2px 8px; font-size: 11px;">
-          Mover / Duplicar ➔
+          ${currentDriveId ? 'Mover / Duplicar ➔' : 'Atribuir a Drive ➔'}
         </button>
         <button class="btn btn-secondary btn-sm btn-project-edit" data-project-id="${project.id}" style="padding: 2px 6px; font-size: 11px;">
           ✎
@@ -338,12 +522,12 @@ function attachProjectCardListeners(container) {
       e.stopPropagation();
       const project = state.projects.find(p => p.id === btn.dataset.projectId);
       const currentDrive = state.drives.find(d => d.id === btn.dataset.driveId);
-      if (project) openMoveProjectModal(project, currentDrive);
+      if (project) openMoveProjectModal(project, currentDrive || null);
     });
   });
 }
 
-// 4. Projects Table View (Spreadsheet Style)
+// 5. Projects Table View (Spreadsheet Style)
 function renderProjectsTable() {
   const tableBody = document.getElementById('projects-table-body');
   if (!tableBody) return;
@@ -362,15 +546,20 @@ function renderProjectsTable() {
   }
 
   tableBody.innerHTML = projects.map(proj => {
-    const isSafe = proj.drives.length >= 2;
-    const backupBadge = isSafe
-      ? `<span class="pill pill-backup-safe">🛡️ Backup Seguro (${proj.drives.length} drives)</span>`
-      : `<span class="pill pill-backup-danger">⚠️ Cópia Única (Sem Backup)</span>`;
+    const copies = (proj.drives || []).length;
+    let backupBadge = '';
+    if (copies === 0) {
+      backupBadge = `<span class="pill pill-unassigned">⚠️ Sem Drive</span>`;
+    } else if (copies >= 2) {
+      backupBadge = `<span class="pill pill-backup-safe">🛡️ Backup Seguro (${copies} drives)</span>`;
+    } else {
+      backupBadge = `<span class="pill pill-backup-danger">⚠️ Cópia Única (Sem Backup)</span>`;
+    }
 
-    const drivesList = proj.drives.map(driveId => {
+    const drivesList = (proj.drives || []).map(driveId => {
       const drive = state.drives.find(d => d.id === driveId);
       return drive ? `<span class="pill" style="border: 1px solid ${drive.color}; color: #fff;">${drive.name}</span>` : '';
-    }).join(' ');
+    }).filter(Boolean).join(' ');
 
     return `
       <tr>
@@ -380,7 +569,11 @@ function renderProjectsTable() {
         </td>
         <td><strong>${proj.client}</strong></td>
         <td><span class="project-weight-badge">${state.constructor.formatGB(proj.sizeGB)}</span></td>
-        <td><div style="display:flex; flex-wrap:wrap; gap:4px;">${drivesList}</div></td>
+        <td>
+          <div style="display:flex; flex-wrap:wrap; gap:4px;">
+            ${drivesList || '<span class="pill pill-unassigned" style="font-size:11px;">⚠️ Nenhum drive vinculado</span>'}
+          </div>
+        </td>
         <td>${backupBadge}</td>
         <td>
           <div style="display:flex; flex-wrap:wrap; gap:3px;">
@@ -388,9 +581,10 @@ function renderProjectsTable() {
           </div>
         </td>
         <td>
-          <div style="display:flex; gap:6px;">
-            <button class="btn btn-secondary btn-sm btn-table-edit" data-project-id="${proj.id}">Editar</button>
-            <button class="btn btn-secondary btn-sm btn-table-move" data-project-id="${proj.id}">Mover / Duplicar</button>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <button class="btn btn-secondary btn-sm btn-table-edit" data-project-id="${proj.id}" title="Editar Projeto">Editar</button>
+            <button class="btn btn-secondary btn-sm btn-table-move" data-project-id="${proj.id}" title="Mover ou Duplicar Projeto">Mover / Duplicar</button>
+            <button class="btn btn-danger btn-sm btn-table-delete" data-project-id="${proj.id}" title="Excluir Projeto do Catálogo" style="padding: 4px 8px;">✕</button>
           </div>
         </td>
       </tr>
@@ -407,140 +601,18 @@ function renderProjectsTable() {
   tableBody.querySelectorAll('.btn-table-move').forEach(btn => {
     btn.addEventListener('click', () => {
       const project = state.projects.find(p => p.id === btn.dataset.projectId);
-      const sourceDrive = state.drives.find(d => d.id === project.drives[0]);
+      const sourceDrive = (project.drives && project.drives.length > 0) ? state.drives.find(d => d.id === project.drives[0]) : null;
       if (project) openMoveProjectModal(project, sourceDrive);
     });
   });
-}
 
-// 5. Storage Analytics & Intuitive Charts
-function renderStorageAnalytics() {
-  const container = document.getElementById('analytics-container');
-  if (!container) return;
-
-  const stats = state.calculateGlobalStats();
-
-  // SVG Donut calculation
-  const radius = 60;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (stats.globalUsagePct / 100) * circumference;
-
-  container.innerHTML = `
-    <!-- Top Stats Counters -->
-    <div class="analytics-grid">
-      <div class="stat-card" style="--stat-color: var(--accent-cyan); --stat-glow: rgba(6, 182, 212, 0.15);">
-        <div class="stat-header">
-          <span class="stat-label">Capacidade Total</span>
-          <div class="stat-icon">🗄️</div>
-        </div>
-        <div class="stat-value">${state.constructor.formatGB(stats.totalStorageGB)}</div>
-        <div class="stat-meta">Distribuído em ${stats.totalDrives} drives físicos</div>
-      </div>
-
-      <div class="stat-card" style="--stat-color: var(--accent-amber); --stat-glow: rgba(245, 158, 11, 0.15);">
-        <div class="stat-header">
-          <span class="stat-label">Espaço Ocupado</span>
-          <div class="stat-icon">📊</div>
-        </div>
-        <div class="stat-value">${state.constructor.formatGB(stats.totalPhysicalUsedGB)}</div>
-        <div class="stat-meta">${stats.globalUsagePct}% da capacidade total do estúdio</div>
-      </div>
-
-      <div class="stat-card" style="--stat-color: var(--accent-emerald); --stat-glow: rgba(16, 185, 129, 0.15);">
-        <div class="stat-header">
-          <span class="stat-label">Espaço Livre</span>
-          <div class="stat-icon">✨</div>
-        </div>
-        <div class="stat-value">${state.constructor.formatGB(stats.totalFreeGB)}</div>
-        <div class="stat-meta">Disponível para novos projetos e gravações</div>
-      </div>
-
-      <div class="stat-card" style="--stat-color: ${stats.safeBackupPct < 60 ? 'var(--accent-rose)' : 'var(--accent-emerald)'}; --stat-glow: rgba(16, 185, 129, 0.15);">
-        <div class="stat-header">
-          <span class="stat-label">Saúde do Backup</span>
-          <div class="stat-icon">${stats.safeBackupPct < 60 ? '⚠️' : '🛡️'}</div>
-        </div>
-        <div class="stat-value">${stats.safeBackupPct}%</div>
-        <div class="stat-meta">${stats.safeBackupCount} de ${stats.totalProjects} projetos possuem backup redundante</div>
-      </div>
-    </div>
-
-    <!-- Charts Row -->
-    <div class="charts-layout">
-      
-      <!-- Interactive SVG Donut Chart -->
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <span class="chart-title">Visão Geral de Ocupação</span>
-        </div>
-        <div class="chart-donut-wrapper">
-          <div class="donut-svg-container">
-            <svg viewBox="0 0 160 160">
-              <circle cx="80" cy="80" r="${radius}" fill="transparent" stroke="var(--bg-surface-elevated)" stroke-width="18" />
-              <circle cx="80" cy="80" r="${radius}" fill="transparent" stroke="var(--accent-cyan)" stroke-width="18"
-                stroke-dasharray="${circumference}"
-                stroke-dashoffset="${strokeDashoffset}"
-                stroke-linecap="round"
-                style="transition: stroke-dashoffset 1s ease;" />
-            </svg>
-            <div class="donut-center-text">
-              <span class="donut-center-pct">${stats.globalUsagePct}%</span>
-              <span class="donut-center-sub">Ocupado</span>
-            </div>
-          </div>
-
-          <div class="donut-legend">
-            <div class="legend-item">
-              <span class="legend-color-dot" style="background: var(--accent-cyan);"></span>
-              <span class="legend-label">Espaço Utilizado:</span>
-              <span class="legend-value">${state.constructor.formatGB(stats.totalPhysicalUsedGB)}</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-color-dot" style="background: var(--bg-surface-elevated);"></span>
-              <span class="legend-label">Espaço Livre:</span>
-              <span class="legend-value">${state.constructor.formatGB(stats.totalFreeGB)}</span>
-            </div>
-            <div class="legend-item" style="margin-top: 8px;">
-              <span class="legend-color-dot" style="background: var(--accent-emerald);"></span>
-              <span class="legend-label">Projetos Seguros (2+ cópias):</span>
-              <span class="legend-value">${stats.safeBackupCount}</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-color-dot" style="background: var(--accent-rose);"></span>
-              <span class="legend-label">Projetos em Risco (Cópia única):</span>
-              <span class="legend-value">${stats.singleCopyCount}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Capacity Bar List Per Drive -->
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <span class="chart-title">Ocupação por Drive Físico</span>
-        </div>
-        <div class="bar-chart-list">
-          ${state.drives.map(drive => {
-            const usage = state.calculateDriveUsage(drive.id);
-            const fillColor = usage.isCritical ? 'var(--gradient-critical)' : usage.isWarning ? 'var(--gradient-warning)' : 'var(--gradient-safe)';
-            return `
-              <div class="bar-chart-row">
-                <div class="bar-chart-row-meta">
-                  <span class="bar-chart-name">
-                    <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${drive.color}; margin-right:6px;"></span>
-                    ${drive.name} (${drive.custody})
-                  </span>
-                  <span class="bar-chart-val">${state.constructor.formatGB(usage.usedGB)} / ${state.constructor.formatGB(usage.totalGB)} (${usage.pct}%)</span>
-                </div>
-                <div class="bar-chart-track">
-                  <div class="bar-chart-fill" style="width: ${usage.pct}%; background: ${fillColor};"></div>
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      </div>
-
-    </div>
-  `;
+  tableBody.querySelectorAll('.btn-table-delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const project = state.projects.find(p => p.id === btn.dataset.projectId);
+      if (project && confirm(`Tem certeza que deseja excluir permanentemente o projeto "${project.name}" do catálogo e de todos os drives?`)) {
+        state.deleteProject(project.id);
+        showToast(`Projeto "${project.name}" excluído.`);
+      }
+    });
+  });
 }

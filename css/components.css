@@ -91,28 +91,23 @@
   line-height: 1.2;
 }
 
-.pill-nvme {
-  background: rgba(6, 182, 212, 0.15);
-  color: var(--accent-cyan);
-  border: 1px solid rgba(6, 182, 212, 0.3);
-}
-
-.pill-ssd {
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-}
-
-.pill-hdd {
+.pill-hd {
   background: rgba(148, 163, 184, 0.15);
   color: #cbd5e1;
   border: 1px solid rgba(148, 163, 184, 0.3);
 }
 
-.pill-raid {
-  background: rgba(139, 92, 246, 0.15);
-  color: #a78bfa;
-  border: 1px solid rgba(139, 92, 246, 0.3);
+.pill-ssd {
+  background: rgba(6, 182, 212, 0.15);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(6, 182, 212, 0.35);
+}
+
+.pill-unassigned {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  font-weight: 600;
 }
 
 /* File System Pills */
@@ -153,14 +148,6 @@
 @keyframes pulse-danger {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.75; }
-}
-
-/* Custody Location Pill */
-.pill-custody {
-  background: rgba(245, 158, 11, 0.12);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.25);
-  font-size: 11px;
 }
 
 /* ==========================================================================
@@ -244,16 +231,6 @@
   letter-spacing: -0.01em;
 }
 
-.drive-serial {
-  font-size: 11px;
-  font-family: monospace;
-  color: var(--text-muted);
-  background: var(--bg-surface-elevated);
-  padding: 1px 6px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-subtle);
-}
-
 .drive-meta-pills {
   display: flex;
   align-items: center;
@@ -323,29 +300,6 @@
   margin-top: 6px;
   font-size: 11px;
   color: var(--text-muted);
-}
-
-/* Drive Custody Row */
-.drive-custody-row {
-  padding: 8px 16px;
-  border-bottom: 1px solid var(--border-subtle);
-  background-color: rgba(245, 158, 11, 0.03);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
-}
-
-.custody-badge-interactive {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #fbbf24;
-  cursor: pointer;
-}
-
-.custody-badge-interactive:hover {
-  text-decoration: underline;
 }
 
 /* Projects Container inside Drive Card */

@@ -43,13 +43,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 5. Setup Modal Forms & Handlers
   setupModalsAndForms();
 
-  // 6. Setup Keyboard Shortcuts
+  // 6. Setup Workbench Filters Dropdown Popover
+  setupFiltersDropdown();
+
+  // 7. Setup Keyboard Shortcuts
   setupKeyboardShortcuts();
 
-  // 7. Initialize Cloud Service (or fallback to local offline mode)
+  // 8. Initialize Cloud Service (or fallback to local offline mode)
   await firebaseService.init();
 
-  // 8. Initial Render
+  // 9. Initial Render
   renderApp();
 });
 
@@ -80,6 +83,36 @@ function setupNavigation() {
       if (sidebar) sidebar.classList.toggle('open');
     });
   }
+}
+
+// Setup Floating Filters Popover in Workbench
+function setupFiltersDropdown() {
+  const toggleBtn = document.getElementById('btn-toggle-filters-menu');
+  const popover = document.getElementById('filters-menu-popover');
+  if (!toggleBtn || !popover) return;
+
+  toggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = popover.style.display !== 'none';
+    popover.style.display = isOpen ? 'none' : 'block';
+    toggleBtn.setAttribute('aria-expanded', !isOpen);
+  });
+
+  // Close when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!popover.contains(e.target) && e.target !== toggleBtn && !toggleBtn.contains(e.target)) {
+      popover.style.display = 'none';
+      toggleBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // Close on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && popover.style.display !== 'none') {
+      popover.style.display = 'none';
+      toggleBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
 }
 
 // Setup Search & Header Buttons
@@ -140,10 +173,10 @@ function setupModalsAndForms() {
   if (driveDeleteBtn) {
     driveDeleteBtn.addEventListener('click', () => {
       const driveId = document.getElementById('drive-id-input').value;
-      if (driveId && confirm('Tem certeza que deseja remover este drive? Os projetos serão mantidos caso estejam em outros drives.')) {
+      if (driveId && confirm('Tem certeza que deseja remover este drive? Os projetos continuarão salvos no catálogo, apenas sem estarem ligados a nenhum drive.')) {
         state.deleteDrive(driveId);
         firebaseService.deleteDriveFromCloud(driveId);
-        showToast('Drive removido com sucesso.');
+        showToast('Drive removido. Os projetos foram preservados no catálogo.');
         closeDialog('drive-modal');
       }
     });

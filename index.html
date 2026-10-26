@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="DMS Drive Manager - Gerenciador Inteligente de HDs, SSDs e Projetos Audiovisuais para Produtoras de Vídeo.">
-  <title>DMS Drive Manager | Produtora de Vídeo</title>
+  <meta name="description" content="DM`S DRIVE MANAGER - Gerenciador Inteligente de HDs, SSDs e Projetos Audiovisuais para Produtoras de Vídeo.">
+  <title>DM`S DRIVE MANAGER</title>
   
   <!-- Modern Clean Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,8 +23,8 @@
     <!-- Top Header -->
     <header class="app-header">
       <div class="brand-section">
-        <button id="btn-toggle-sidebar" class="btn btn-icon" style="display:none;" title="Menu de Filtros">
-          ☰
+        <button id="btn-toggle-sidebar" class="btn btn-icon" style="display:none;" title="Painel de Armazenamento">
+          📊
         </button>
         <div class="brand-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -35,11 +35,8 @@
           </svg>
         </div>
         <div class="brand-info">
-          <h1>
-            DMS Drive Manager
-            <span class="brand-badge">Studio Pro</span>
-          </h1>
-          <p>Catálogo e Rastreamento de Armazenamento</p>
+          <h1>DM`S DRIVE MANAGER</h1>
+          <p>Catálogo e Gerenciador de Armazenamento</p>
         </div>
       </div>
 
@@ -92,9 +89,6 @@
         <button class="nav-tab-btn" data-view="table">
           <span>📋</span> Lista de Projetos (Tabela)
         </button>
-        <button class="nav-tab-btn" data-view="analytics">
-          <span>📊</span> Armazenamento & Gráficos
-        </button>
       </div>
 
       <div class="quick-actions-bar">
@@ -107,9 +101,9 @@
     <!-- Application Body -->
     <div class="app-body">
       
-      <!-- Filter Sidebar -->
+      <!-- Storage & Health Dashboard Sidebar (Always Visible) -->
       <aside class="app-sidebar">
-        <div id="sidebar-filters">
+        <div id="sidebar-storage-dashboard">
           <!-- Dynamically populated by ui-render.js -->
         </div>
       </aside>
@@ -126,6 +120,28 @@
               </h2>
               <p class="section-subtitle">Arraste os cartões de projeto entre os drives para transferir ou criar cópias de segurança.</p>
             </div>
+
+            <div class="workbench-header-actions">
+              <div class="filters-dropdown-wrapper">
+                <button id="btn-toggle-filters-menu" class="btn btn-secondary btn-sm" aria-expanded="false" title="Filtrar por Segurança, Tipo de Mídia ou Cliente">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                  </svg>
+                  <span>Filtros</span>
+                  <span id="active-filters-count" class="filters-badge" style="display:none;">0</span>
+                </button>
+
+                <!-- Floating Filters Popover -->
+                <div id="filters-menu-popover" class="filters-popover" style="display:none;">
+                  <!-- Dynamically populated by ui-render.js -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unassigned Projects (Projects without any drive) -->
+          <div id="unassigned-projects-container" class="unassigned-projects-section" style="display: none;">
+            <!-- Dynamically populated by ui-render.js -->
           </div>
 
           <div id="drives-grid-container" class="drives-grid">
@@ -166,22 +182,6 @@
           </div>
         </section>
 
-        <!-- View 3: Storage Analytics & Charts -->
-        <section id="view-analytics" class="view-section">
-          <div class="section-header">
-            <div>
-              <h2 class="section-title">
-                <span>Visão Geral de Armazenamento</span>
-              </h2>
-              <p class="section-subtitle">Métricas de ocupação, saúde de redundância e capacidade por dispositivo.</p>
-            </div>
-          </div>
-
-          <div id="analytics-container">
-            <!-- Dynamically populated by ui-render.js -->
-          </div>
-        </section>
-
       </main>
     </div>
 
@@ -209,23 +209,13 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label" for="drive-serial-input">Etiqueta Física / Serial</label>
-              <input type="text" id="drive-serial-input" class="form-input" placeholder="Ex: SD-4TB-01" />
-              <span class="form-hint">Código colado na carcaça do drive</span>
-            </div>
-
-            <div class="form-group">
               <label class="form-label" for="drive-type-select">Tipo de Mídia *</label>
               <select id="drive-type-select" class="form-select">
-                <option value="nvme">⚡ NVMe M.2 / Thunderbolt (Alta Velocidade)</option>
-                <option value="ssd">💾 SSD SATA Externo / Portátil</option>
-                <option value="hdd">🗄️ HDD Desktop 3.5" (Armazenamento)</option>
-                <option value="raid">🏢 RAID / Storage em Rede (DAS/NAS)</option>
+                <option value="hd">🗄️ HD (Hard Disk / Armazenamento)</option>
+                <option value="ssd">⚡ SSD (Solid State / Alta Velocidade)</option>
               </select>
             </div>
-          </div>
 
-          <div class="form-row">
             <div class="form-group">
               <label class="form-label" for="drive-fs-select">Sistema de Arquivos *</label>
               <select id="drive-fs-select" class="form-select">
@@ -235,23 +225,17 @@
                 <option value="ntfs">NTFS (Windows Nativo)</option>
               </select>
             </div>
-
-            <div class="form-group">
-              <label class="form-label">Capacidade Total *</label>
-              <div style="display: flex; gap: 8px;">
-                <input type="number" id="drive-capacity-val" class="form-input" value="2" min="1" step="0.5" required />
-                <select id="drive-capacity-unit" class="form-select" style="width: 90px;">
-                  <option value="TB">TB</option>
-                  <option value="GB">GB</option>
-                </select>
-              </div>
-            </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="drive-custody-input">Custódia Física (Com quem / Onde está?) *</label>
-            <input type="text" id="drive-custody-input" class="form-input" placeholder="Ex: Davi (Ilha 01), Armário Gaveta B, Na Mochila" required />
-            <span class="form-hint">Essencial para evitar drives perdidos na produtora</span>
+            <label class="form-label">Capacidade Total *</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="number" id="drive-capacity-val" class="form-input" value="2" min="0.5" step="0.5" required />
+              <select id="drive-capacity-unit" class="form-select" style="width: 90px;">
+                <option value="TB">TB</option>
+                <option value="GB">GB</option>
+              </select>
+            </div>
           </div>
 
           <div class="form-group">

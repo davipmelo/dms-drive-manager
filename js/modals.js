@@ -65,8 +65,7 @@ export function openDriveModal(driveToEdit = null) {
   document.getElementById('drive-modal-title').textContent = isEdit ? 'Editar Drive' : 'Cadastrar Novo Drive';
   document.getElementById('drive-id-input').value = isEdit ? driveToEdit.id : '';
   document.getElementById('drive-name-input').value = isEdit ? driveToEdit.name : '';
-  document.getElementById('drive-serial-input').value = isEdit ? driveToEdit.serial : '';
-  document.getElementById('drive-type-select').value = isEdit ? driveToEdit.type : 'nvme';
+  document.getElementById('drive-type-select').value = isEdit ? (driveToEdit.type === 'ssd' ? 'ssd' : 'hd') : 'hd';
   document.getElementById('drive-fs-select').value = isEdit ? driveToEdit.fileSystem : 'exfat';
   
   // Capacity: support GB/TB conversion
@@ -79,7 +78,6 @@ export function openDriveModal(driveToEdit = null) {
     document.getElementById('drive-capacity-unit').value = 'GB';
   }
 
-  document.getElementById('drive-custody-input').value = isEdit ? driveToEdit.custody : 'Armário Central - Gaveta A';
   document.getElementById('drive-color-input').value = isEdit ? driveToEdit.color : '#06b6d4';
   document.getElementById('drive-notes-input').value = isEdit ? (driveToEdit.notes || '') : '';
 
@@ -102,15 +100,13 @@ export function handleDriveFormSubmit(e) {
   e.preventDefault();
   const id = document.getElementById('drive-id-input').value;
   const name = document.getElementById('drive-name-input').value.trim();
-  const serial = document.getElementById('drive-serial-input').value.trim();
-  const type = document.getElementById('drive-type-select').value;
+  const type = document.getElementById('drive-type-select').value === 'ssd' ? 'ssd' : 'hd';
   const fileSystem = document.getElementById('drive-fs-select').value;
   
   const capVal = parseFloat(document.getElementById('drive-capacity-val').value) || 2;
   const capUnit = document.getElementById('drive-capacity-unit').value;
   const totalCapacityGB = capUnit === 'TB' ? capVal * 1000 : capVal;
 
-  const custody = document.getElementById('drive-custody-input').value.trim();
   const color = document.getElementById('drive-color-input').value;
   const notes = document.getElementById('drive-notes-input').value.trim();
 
@@ -121,14 +117,14 @@ export function handleDriveFormSubmit(e) {
 
   if (id) {
     // Update existing
-    const updated = state.updateDrive(id, { name, serial, type, fileSystem, totalCapacityGB, custody, color, notes });
+    const updated = state.updateDrive(id, { name, type, fileSystem, totalCapacityGB, color, notes });
     if (updated) {
       firebaseService.saveDriveToCloud(updated);
       showToast(`Drive "${name}" atualizado com sucesso!`);
     }
   } else {
     // Create new
-    const created = state.addDrive({ name, serial, type, fileSystem, totalCapacityGB, custody, color, notes });
+    const created = state.addDrive({ name, type, fileSystem, totalCapacityGB, color, notes });
     firebaseService.saveDriveToCloud(created);
     showToast(`Drive "${name}" cadastrado com sucesso!`);
   }
@@ -166,31 +162,39 @@ export function openProjectModal(projectToEdit = null, preselectedDriveId = null
   const driveCheckboxesContainer = document.getElementById('project-drives-checkboxes');
   driveCheckboxesContainer.innerHTML = '';
 
-  state.drives.forEach(drive => {
-    const isChecked = isEdit 
-      ? projectToEdit.drives.includes(drive.id)
-      : (preselectedDriveId ? drive.id === preselectedDriveId : false);
-
-    const label = document.createElement('label');
-    label.className = 'drive-checkbox-item';
-    label.style.display = 'flex';
-    label.style.alignItems = 'center';
-    label.style.gap = '8px';
-    label.style.padding = '8px 12px';
-    label.style.background = 'var(--bg-surface-elevated)';
-    label.style.borderRadius = 'var(--radius-sm)';
-    label.style.cursor = 'pointer';
-    label.style.border = '1px solid var(--border-subtle)';
-
-    label.innerHTML = `
-      <input type="checkbox" name="project-drive" value="${drive.id}" ${isChecked ? 'checked' : ''} />
-      <span style="width: 8px; height: 8px; border-radius: 50%; background: ${drive.color};"></span>
-      <span style="font-weight: 500; font-size: 13px;">${drive.name}</span>
-      <span style="color: var(--text-muted); font-size: 11px; margin-left: auto;">${drive.custody}</span>
+  if (state.drives.length === 0) {
+    driveCheckboxesContainer.innerHTML = `
+      <div style="font-size: 12px; color: var(--text-muted); padding: 8px;">
+        Nenhum drive cadastrado no momento. O projeto será salvo desvinculado.
+      </div>
     `;
+  } else {
+    state.drives.forEach(drive => {
+      const isChecked = isEdit 
+        ? (projectToEdit.drives || []).includes(drive.id)
+        : (preselectedDriveId ? drive.id === preselectedDriveId : false);
 
-    driveCheckboxesContainer.appendChild(label);
-  });
+      const label = document.createElement('label');
+      label.className = 'drive-checkbox-item';
+      label.style.display = 'flex';
+      label.style.alignItems = 'center';
+      label.style.gap = '8px';
+      label.style.padding = '8px 12px';
+      label.style.background = 'var(--bg-surface-elevated)';
+      label.style.borderRadius = 'var(--radius-sm)';
+      label.style.cursor = 'pointer';
+      label.style.border = '1px solid var(--border-subtle)';
+
+      label.innerHTML = `
+        <input type="checkbox" name="project-drive" value="${drive.id}" ${isChecked ? 'checked' : ''} />
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: ${drive.color};"></span>
+        <span style="font-weight: 500; font-size: 13px;">${drive.name}</span>
+        <span style="color: var(--text-muted); font-size: 11px; margin-left: auto;">${drive.type.toUpperCase()} • ${state.constructor.formatGB(drive.totalCapacityGB)}</span>
+      `;
+
+      driveCheckboxesContainer.appendChild(label);
+    });
+  }
 
   // Delete button
   const deleteBtn = document.getElementById('project-delete-btn');
@@ -224,21 +228,16 @@ export function handleProjectFormSubmit(e) {
     return;
   }
 
-  if (checkedDrives.length === 0) {
-    showToast('Selecione pelo menos um drive onde o projeto está salvo.', 'warning');
-    return;
-  }
-
   if (id) {
     const updated = state.updateProject(id, { name, client, sizeGB, drives: checkedDrives, tags, notes });
     if (updated) {
       firebaseService.saveProjectToCloud(updated);
-      showToast(`Projeto "${name}" atualizado!`);
+      showToast(checkedDrives.length > 0 ? `Projeto "${name}" atualizado!` : `Projeto "${name}" atualizado (sem drive vinculado).`);
     }
   } else {
     const created = state.addProject({ name, client, sizeGB, drives: checkedDrives, tags, notes });
     firebaseService.saveProjectToCloud(created);
-    showToast(`Projeto "${name}" registrado com sucesso!`);
+    showToast(checkedDrives.length > 0 ? `Projeto "${name}" registrado com sucesso!` : `Projeto "${name}" registrado (sem drive vinculado).`);
   }
 
   closeDialog('project-modal');
@@ -247,12 +246,12 @@ export function handleProjectFormSubmit(e) {
 // ==========================================================================
 // 3. MOVE OR DUPLICATE PROJECT MODAL
 // ==========================================================================
-export function openMoveProjectModal(project, sourceDrive, targetDrive = null) {
+export function openMoveProjectModal(project, sourceDrive = null, targetDrive = null) {
   const modal = document.getElementById('move-project-modal');
   if (!modal) return;
 
   document.getElementById('move-modal-project-name').textContent = project.name;
-  document.getElementById('move-modal-source-name').textContent = sourceDrive ? sourceDrive.name : 'Drive de Origem';
+  document.getElementById('move-modal-source-name').textContent = sourceDrive ? sourceDrive.name : 'Nenhum (Desvinculado)';
 
   // Populate target drive select
   const targetSelect = document.getElementById('move-modal-target-select');
@@ -263,7 +262,7 @@ export function openMoveProjectModal(project, sourceDrive, targetDrive = null) {
     if (drive.id !== (sourceDrive ? sourceDrive.id : null)) {
       const option = document.createElement('option');
       option.value = drive.id;
-      option.textContent = `${drive.name} (${drive.custody}) - ${state.calculateDriveUsage(drive.id).freeGB} GB livres`;
+      option.textContent = `${drive.name} (${drive.type.toUpperCase()}) - ${state.calculateDriveUsage(drive.id).freeGB} GB livres`;
       if (targetDrive && drive.id === targetDrive.id) {
         option.selected = true;
       }
@@ -303,18 +302,6 @@ export function handleMoveActionSubmit(actionType) {
   }
 
   closeDialog('move-project-modal');
-}
-
-// ==========================================================================
-// 4. QUICK CUSTODY EDIT (Quem está com o drive físico?)
-// ==========================================================================
-export function openCustodyQuickEdit(drive) {
-  const newCustody = prompt(`Localização / Custódia física de "${drive.name}":\n(Ex: "Com Davi - Ilha 1", "Armário Central - Gaveta B", "Mochila de Gravação")`, drive.custody);
-  if (newCustody !== null && newCustody.trim()) {
-    state.updateDriveCustody(drive.id, newCustody.trim());
-    firebaseService.saveDriveToCloud(state.drives.find(d => d.id === drive.id));
-    showToast(`Custódia atualizada: ${newCustody.trim()}`);
-  }
 }
 
 // ==========================================================================

@@ -7,57 +7,47 @@ export const INITIAL_DRIVES = [
   {
     id: "drive-1",
     name: "SSD SanDisk Extreme Pro 4TB",
-    serial: "SD-4TB-01",
-    type: "nvme", // nvme, ssd, hdd, raid
-    fileSystem: "exfat", // exfat, apfs, hfs, ntfs
+    type: "ssd", // hd, ssd
+    fileSystem: "exfat",
     totalCapacityGB: 4000,
-    custody: "Davi (Ilha 01 - Edição)",
     color: "#06b6d4", // Cyan
     notes: "SSD principal de edição de diárias 4K/6K em ProRes"
   },
   {
     id: "drive-2",
     name: "SSD Samsung T7 Shield 2TB",
-    serial: "SS-2TB-03",
     type: "ssd",
     fileSystem: "apfs",
     totalCapacityGB: 2000,
-    custody: "Mochila de Gravação / Set",
     color: "#f59e0b", // Amber
     notes: "Utilizado para descarrego direto das câmeras no set"
   },
   {
     id: "drive-3",
-    name: "G-Drive Enterprise 18TB Desktop",
-    serial: "GD-18TB-01",
-    type: "hdd",
+    name: "HD G-Drive Enterprise 18TB Desktop",
+    type: "hd",
     fileSystem: "exfat",
     totalCapacityGB: 18000,
-    custody: "Armário Central - Gaveta B",
     color: "#8b5cf6", // Purple
     notes: "Drive de arquivo bruto e backup primário do estúdio"
   },
   {
     id: "drive-4",
-    name: "LaCie Rugged Pro 2TB (Laranja)",
-    serial: "LC-2TB-02",
-    type: "nvme",
+    name: "SSD LaCie Rugged Pro 2TB (Laranja)",
+    type: "ssd",
     fileSystem: "exfat",
     totalCapacityGB: 2000,
-    custody: "Lucas (Colorista - Remoto)",
     color: "#f97316", // Orange
-    notes: "Em trânsito com o colorista para grading no DaVinci"
+    notes: "Em trânsito para gravações e grading no DaVinci"
   },
   {
     id: "drive-5",
-    name: "RAID OWC ThunderBay 32TB",
-    serial: "TB-32TB-01",
-    type: "raid",
+    name: "HD Storage Central 32TB",
+    type: "hd",
     fileSystem: "apfs",
     totalCapacityGB: 32000,
-    custody: "Sala do Servidor / Baia 2",
     color: "#10b981", // Emerald
-    notes: "Storage central conectado à rede de 10GbE"
+    notes: "Storage central conectado à rede de alta velocidade"
   }
 ];
 

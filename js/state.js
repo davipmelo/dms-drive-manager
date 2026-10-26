@@ -19,8 +19,29 @@ class StateStore {
     this.activeView = 'drives'; // 'drives' | 'table' | 'analytics'
     
     // Load local cache or fallback to initial video sample data
-    this.drives = this.loadFromLocalStorage(STORAGE_KEYS.DRIVES, INITIAL_DRIVES);
-    this.projects = this.loadFromLocalStorage(STORAGE_KEYS.PROJECTS, INITIAL_PROJECTS);
+    const loadedDrives = this.loadFromLocalStorage(STORAGE_KEYS.DRIVES, INITIAL_DRIVES);
+    // Sanitize drive types: only 'hd' and 'ssd', remove obsolete properties
+    this.drives = loadedDrives.map(d => {
+      let cleanType = 'hd';
+      if (d.type === 'ssd' || d.type === 'nvme') cleanType = 'ssd';
+      else cleanType = 'hd';
+      return {
+        id: d.id,
+        name: d.name,
+        type: cleanType,
+        fileSystem: d.fileSystem || 'exfat',
+        totalCapacityGB: Number(d.totalCapacityGB) || 2000,
+        color: d.color || '#06b6d4',
+        notes: d.notes || ''
+      };
+    });
+
+    const loadedProjects = this.loadFromLocalStorage(STORAGE_KEYS.PROJECTS, INITIAL_PROJECTS);
+    this.projects = loadedProjects.map(p => ({
+      ...p,
+      drives: Array.isArray(p.drives) ? p.drives : []
+    }));
+
     this.currentUser = this.loadFromLocalStorage(STORAGE_KEYS.USER, {
       name: 'Editor Convidado',
       email: 'editor@produtora.com',
@@ -32,8 +53,7 @@ class StateStore {
     this.filters = {
       searchQuery: '',
       client: 'all',
-      driveType: 'all',
-      custody: 'all',
+      driveType: 'all', // 'all' | 'hd' | 'ssd'
       redundancy: 'all', // 'all' | 'single' | 'safe'
       tag: 'all'
     };
@@ -95,7 +115,6 @@ class StateStore {
       searchQuery: '',
       client: 'all',
       driveType: 'all',
-      custody: 'all',
       redundancy: 'all',
       tag: 'all'
     };
@@ -104,14 +123,13 @@ class StateStore {
 
   // Drive CRUD
   addDrive(driveData) {
+    const cleanType = driveData.type === 'ssd' ? 'ssd' : 'hd';
     const newDrive = {
       id: `drive-${Date.now()}`,
       name: driveData.name.trim(),
-      serial: driveData.serial ? driveData.serial.trim().toUpperCase() : `DRV-${Math.floor(100 + Math.random() * 900)}`,
-      type: driveData.type || 'nvme',
+      type: cleanType,
       fileSystem: driveData.fileSystem || 'exfat',
       totalCapacityGB: Number(driveData.totalCapacityGB) || 2000,
-      custody: driveData.custody ? driveData.custody.trim() : 'Armário Central',
       color: driveData.color || '#06b6d4',
       notes: driveData.notes ? driveData.notes.trim() : ''
     };
@@ -124,7 +142,13 @@ class StateStore {
   updateDrive(driveId, updates) {
     const index = this.drives.findIndex(d => d.id === driveId);
     if (index !== -1) {
-      this.drives[index] = { ...this.drives[index], ...updates };
+      const sanitizedUpdates = { ...updates };
+      if (sanitizedUpdates.type) {
+        sanitizedUpdates.type = (sanitizedUpdates.type === 'ssd' || sanitizedUpdates.type === 'nvme') ? 'ssd' : 'hd';
+      }
+      delete sanitizedUpdates.serial;
+      delete sanitizedUpdates.custody;
+      this.drives[index] = { ...this.drives[index], ...sanitizedUpdates };
       this.notify();
       return this.drives[index];
     }
@@ -132,12 +156,12 @@ class StateStore {
   }
 
   deleteDrive(driveId) {
-    // Remove drive and disassociate projects from it
+    // Remove drive, mas projetos continuam existindo sem estar ligados a nenhum drive
     this.drives = this.drives.filter(d => d.id !== driveId);
     this.projects = this.projects.map(proj => ({
       ...proj,
-      drives: proj.drives.filter(id => id !== driveId)
-    })).filter(proj => proj.drives.length > 0); // Keep projects that still have at least 1 drive
+      drives: Array.isArray(proj.drives) ? proj.drives.filter(id => id !== driveId) : []
+    }));
 
     this.notify();
   }
@@ -149,7 +173,7 @@ class StateStore {
       name: projectData.name.trim(),
       client: projectData.client ? projectData.client.trim() : 'Geral',
       sizeGB: Number(projectData.sizeGB) || 100,
-      drives: Array.isArray(projectData.drives) && projectData.drives.length > 0 ? projectData.drives : [this.drives[0]?.id || 'drive-1'],
+      drives: Array.isArray(projectData.drives) ? projectData.drives : [],
       tags: Array.isArray(projectData.tags) ? projectData.tags : (projectData.tags ? projectData.tags.split(',').map(t => t.trim()).filter(Boolean) : []),
       createdAt: new Date().toISOString().split('T')[0],
       updatedAt: new Date().toISOString().split('T')[0],
@@ -188,7 +212,7 @@ class StateStore {
     if (!project) return;
 
     // Remove from source and add to target
-    const updatedDrives = project.drives.filter(d => d !== sourceDriveId);
+    const updatedDrives = (project.drives || []).filter(d => d !== sourceDriveId);
     if (!updatedDrives.includes(targetDriveId)) {
       updatedDrives.push(targetDriveId);
     }
@@ -201,8 +225,9 @@ class StateStore {
     if (!project) return;
 
     // Keep on original drives AND add target drive (creates a safe backup replica!)
-    if (!project.drives.includes(targetDriveId)) {
-      const updatedDrives = [...project.drives, targetDriveId];
+    const currentDrives = project.drives || [];
+    if (!currentDrives.includes(targetDriveId)) {
+      const updatedDrives = [...currentDrives, targetDriveId];
       this.updateProject(projectId, { drives: updatedDrives });
     }
   }
@@ -211,18 +236,9 @@ class StateStore {
     const project = this.projects.find(p => p.id === projectId);
     if (!project) return;
 
-    if (project.drives.length <= 1) {
-      // If this is the only drive, deleting it from this drive deletes the project record
-      this.deleteProject(projectId);
-    } else {
-      const updatedDrives = project.drives.filter(id => id !== driveId);
-      this.updateProject(projectId, { drives: updatedDrives });
-    }
-  }
-
-  // Quick Custody Update
-  updateDriveCustody(driveId, newCustody) {
-    this.updateDrive(driveId, { custody: newCustody });
+    // Remove o drive do projeto, mas NUNCA exclui o projeto do sistema
+    const updatedDrives = (project.drives || []).filter(id => id !== driveId);
+    this.updateProject(projectId, { drives: updatedDrives });
   }
 
   // Calculations & Analytics
@@ -230,7 +246,7 @@ class StateStore {
     const drive = this.drives.find(d => d.id === driveId);
     if (!drive) return { usedGB: 0, totalGB: 0, freeGB: 0, pct: 0, isWarning: false, isCritical: false, projectCount: 0 };
 
-    const driveProjects = this.projects.filter(p => p.drives.includes(driveId));
+    const driveProjects = this.projects.filter(p => (p.drives || []).includes(driveId));
     const usedGB = driveProjects.reduce((acc, p) => acc + (p.sizeGB || 0), 0);
     const totalGB = drive.totalCapacityGB || 1000;
     const freeGB = Math.max(0, totalGB - usedGB);
@@ -252,8 +268,13 @@ class StateStore {
     const totalProjects = this.projects.length;
 
     let totalStorageGB = 0;
+    let hdCount = 0;
+    let ssdCount = 0;
+
     for (const drive of this.drives) {
       totalStorageGB += (drive.totalCapacityGB || 0);
+      if (drive.type === 'ssd') ssdCount++;
+      else hdCount++;
     }
 
     // Calculate unique project data footprint (sum of all projects' sizes)
@@ -263,11 +284,15 @@ class StateStore {
     let totalPhysicalUsedGB = 0;
     let singleCopyCount = 0;
     let safeBackupCount = 0;
+    let unassignedProjectsCount = 0;
 
     for (const project of this.projects) {
-      const copies = project.drives.length;
+      const copies = (project.drives || []).length;
       totalPhysicalUsedGB += (project.sizeGB || 0) * copies;
-      if (copies <= 1) {
+      if (copies === 0) {
+        unassignedProjectsCount++;
+        singleCopyCount++;
+      } else if (copies === 1) {
         singleCopyCount++;
       } else {
         safeBackupCount++;
@@ -280,7 +305,10 @@ class StateStore {
 
     return {
       totalDrives,
+      hdCount,
+      ssdCount,
       totalProjects,
+      unassignedProjectsCount,
       totalStorageGB,
       totalPhysicalUsedGB,
       totalFreeGB,
@@ -311,10 +339,10 @@ class StateStore {
       }
 
       // Filter by Redundancy
-      if (this.filters.redundancy === 'single' && p.drives.length > 1) {
+      if (this.filters.redundancy === 'single' && (p.drives || []).length > 1) {
         return false;
       }
-      if (this.filters.redundancy === 'safe' && p.drives.length <= 1) {
+      if (this.filters.redundancy === 'safe' && (p.drives || []).length <= 1) {
         return false;
       }
 
@@ -323,14 +351,11 @@ class StateStore {
         return false;
       }
 
-      // Filter by Drive Type or Custody
-      if (this.filters.driveType !== 'all' || this.filters.custody !== 'all') {
-        const driveMatches = p.drives.some(driveId => {
+      // Filter by Drive Type (hd or ssd)
+      if (this.filters.driveType !== 'all') {
+        const driveMatches = (p.drives || []).some(driveId => {
           const drive = this.drives.find(d => d.id === driveId);
-          if (!drive) return false;
-          if (this.filters.driveType !== 'all' && drive.type !== this.filters.driveType) return false;
-          if (this.filters.custody !== 'all' && drive.custody !== this.filters.custody) return false;
-          return true;
+          return drive && drive.type === this.filters.driveType;
         });
         if (!driveMatches) return false;
       }
@@ -344,12 +369,6 @@ class StateStore {
     const clients = new Set();
     this.projects.forEach(p => { if (p.client) clients.add(p.client); });
     return Array.from(clients).sort();
-  }
-
-  getCustodiesList() {
-    const custodies = new Set();
-    this.drives.forEach(d => { if (d.custody) custodies.add(d.custody); });
-    return Array.from(custodies).sort();
   }
 
   getTagsList() {
