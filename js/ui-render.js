@@ -274,10 +274,10 @@ function renderSidebarStorage() {
       }, 150);
     };
 
-    atRiskCard.addEventListener('mouseenter', showTooltip);
-    atRiskCard.addEventListener('mouseleave', hideTooltip);
-    tooltip.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
-    tooltip.addEventListener('mouseleave', hideTooltip);
+    atRiskCard.onmouseenter = showTooltip;
+    atRiskCard.onmouseleave = hideTooltip;
+    tooltip.onmouseenter = () => clearTimeout(hideTimeout);
+    tooltip.onmouseleave = hideTooltip;
   }
 }
 
