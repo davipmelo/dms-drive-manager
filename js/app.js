@@ -7,10 +7,10 @@ import { state } from './state.js';
 import { firebaseService } from './firebase-service.js';
 import { initDragAndDrop } from './drag-drop.js';
 import { renderApp } from './ui-render.js';
-import { 
-  openDriveModal, 
+import {
+  openDriveModal,
   handleDriveFormSubmit,
-  openProjectModal, 
+  openProjectModal,
   handleProjectFormSubmit,
   openFirebaseModal,
   handleFirebaseSave,
