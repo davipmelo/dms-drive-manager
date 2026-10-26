@@ -124,14 +124,14 @@
             <div class="workbench-header-actions">
               <!-- Grid / List View Toggle -->
               <div class="view-mode-toggle">
-                <button type="button" id="btn-view-grid" class="view-mode-btn active" title="Visualização em Grade">
+                <button type="button" id="btn-view-grid" class="view-mode-btn active" title="Visualização em Quadro">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="3" width="7" height="7"></rect>
                     <rect x="14" y="3" width="7" height="7"></rect>
                     <rect x="14" y="14" width="7" height="7"></rect>
                     <rect x="3" y="14" width="7" height="7"></rect>
                   </svg>
-                  <span>Grade</span>
+                  <span>Quadro</span>
                 </button>
                 <button type="button" id="btn-view-list" class="view-mode-btn" title="Visualização em Lista">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -246,7 +246,7 @@
               <select id="drive-fs-select" class="form-select">
                 <option value="exFAT">exFAT</option>
                 <option value="APFS">APFS</option>
-                <option value="HFS+">HFS+</option>
+                <option value="MacOS Ext.">MacOS Ext.</option>
                 <option value="NTFS">NTFS</option>
               </select>
             </div>
@@ -341,38 +341,41 @@
             <input type="hidden" id="project-tags-input" value="" />
             
             <!-- Tags Selected for Current Project -->
-            <div id="project-selected-tags-box" class="project-tags-chips-container">
-              <!-- Dynamically populated selected tag pills with (X) button -->
+            <div class="project-tags-section">
+              <div class="project-tags-section-header">
+                <span class="tags-subheading">Tags Atribuídas a Este Projeto</span>
+                <span class="form-hint">Clique no ✕ para desvincular</span>
+              </div>
+              <div id="project-selected-tags-box" class="project-tags-chips-container">
+                <!-- Dynamically populated selected tag pills with (X) button -->
+              </div>
             </div>
 
-            <!-- Existing Tags Dropdown Picker -->
-            <div style="margin-top: 8px;">
-              <label class="form-hint" style="margin-bottom: 4px; display: block;">Escolha entre as tags já cadastradas:</label>
-              <select id="project-existing-tags-select" class="form-select">
-                <option value="">-- Selecione uma tag existente --</option>
-              </select>
-            </div>
-
-            <!-- Create New Tag Inline Form -->
-            <div class="new-tag-creation-box" style="margin-top: 10px; padding: 10px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
-              <label class="form-hint" style="margin-bottom: 6px; display: block; font-weight: 600;">Ou crie uma nova tag com cor personalizada:</label>
-              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                <input type="text" id="new-tag-name-input" class="form-input" placeholder="Nome da nova tag..." style="flex: 1; min-width: 140px;" />
-                
-                <input type="hidden" id="new-tag-color-input" value="#ffbb00" />
-                <div class="color-swatches tag-swatches-inline" id="new-tag-color-swatches">
-                  <button type="button" class="color-swatch-btn selected" data-color="#ffbb00" style="background:#ffbb00;" title="Amarelo"></button>
-                  <button type="button" class="color-swatch-btn" data-color="#f59e0b" style="background:#f59e0b;" title="Âmbar"></button>
-                  <button type="button" class="color-swatch-btn" data-color="#3b82f6" style="background:#3b82f6;" title="Azul"></button>
-                  <button type="button" class="color-swatch-btn" data-color="#8b5cf6" style="background:#8b5cf6;" title="Roxo"></button>
-                  <button type="button" class="color-swatch-btn" data-color="#10b981" style="background:#10b981;" title="Esmeralda"></button>
-                  <button type="button" class="color-swatch-btn" data-color="#06b6d4" style="background:#06b6d4;" title="Ciano"></button>
-                  <button type="button" class="color-swatch-btn" data-color="#ef4444" style="background:#ef4444;" title="Vermelho"></button>
+            <!-- Create New Tag with Native Color Picker (No predefined colors) -->
+            <div class="new-tag-creation-box">
+              <div class="project-tags-section-header">
+                <span class="tags-subheading">Criar Nova Tag</span>
+                <span class="form-hint">Defina o nome e escolha qualquer cor personalizada</span>
+              </div>
+              <div class="new-tag-inputs-row">
+                <input type="text" id="new-tag-name-input" class="form-input" placeholder="Nome da nova tag..." />
+                <div class="tag-color-picker-wrap" title="Escolha a cor da tag">
+                  <input type="color" id="new-tag-color-picker" class="tag-color-picker-input" value="#ffbb00" />
                 </div>
-
-                <button type="button" id="btn-add-new-tag" class="btn btn-secondary btn-sm" style="white-space: nowrap;">
+                <button type="button" id="btn-add-new-tag" class="btn btn-secondary btn-sm">
                   + Criar Tag
                 </button>
+              </div>
+            </div>
+
+            <!-- Existing Tags Catalog & Manager -->
+            <div class="tags-manager-box">
+              <div class="project-tags-section-header">
+                <span class="tags-subheading">Tags Cadastradas no Sistema</span>
+                <span class="form-hint">Clique na tag para adicionar • Altere a cor ou exclua</span>
+              </div>
+              <div id="all-tags-manager-list" class="all-tags-manager-list">
+                <!-- Dynamically rendered list of all tags with color preview/picker, click-to-add and delete button -->
               </div>
             </div>
           </div>

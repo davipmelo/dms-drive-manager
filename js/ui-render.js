@@ -108,7 +108,7 @@ function renderSidebarStorage() {
               </div>
             </div>
             <div class="gauge-stat-item">
-              <span class="stat-dot" style="background: var(--text-secondary);"></span>
+              <span class="stat-dot" style="background: #10b981;"></span>
               <div>
                 <div class="gauge-stat-label">Espaço Livre</div>
                 <div class="gauge-stat-val">${state.constructor.formatGB(stats.totalFreeGB)}</div>
@@ -407,6 +407,15 @@ function renderDrivesWorkbench() {
   // Projects not assigned to any drive
   const unassignedProjects = state.projects.filter(p => !p.drives || p.drives.length === 0);
   const matchingUnassigned = unassignedProjects.filter(p => filteredProjectIds.has(p.id));
+  matchingUnassigned.sort((a, b) => {
+    const clientA = (a.client || '').trim().toLowerCase();
+    const clientB = (b.client || '').trim().toLowerCase();
+    const comp = clientA.localeCompare(clientB, 'pt-BR', { sensitivity: 'base' });
+    if (comp !== 0) return comp;
+    const nameA = (a.name || '').trim().toLowerCase();
+    const nameB = (b.name || '').trim().toLowerCase();
+    return nameA.localeCompare(nameB, 'pt-BR', { sensitivity: 'base' });
+  });
 
   // Render Unassigned Projects Banner if any exist
   if (unassignedContainer) {
@@ -501,12 +510,22 @@ function renderDrivesWorkbench() {
       const usage = state.calculateDriveUsage(drive.id);
       const driveProjects = state.projects.filter(p => (p.drives || []).includes(drive.id));
       const matchingProjects = driveProjects.filter(p => filteredProjectIds.has(p.id));
+      matchingProjects.sort((a, b) => {
+        const clientA = (a.client || '').trim().toLowerCase();
+        const clientB = (b.client || '').trim().toLowerCase();
+        const comp = clientA.localeCompare(clientB, 'pt-BR', { sensitivity: 'base' });
+        if (comp !== 0) return comp;
+        const nameA = (a.name || '').trim().toLowerCase();
+        const nameB = (b.name || '').trim().toLowerCase();
+        return nameA.localeCompare(nameB, 'pt-BR', { sensitivity: 'base' });
+      });
 
       const isSSD = String(drive.type).toUpperCase() === 'SSD';
       const typeClass = isSSD ? 'pill-ssd' : 'pill-hd';
       const typeLabel = isSSD ? 'SSD' : 'HD';
 
-      const fsClass = `pill-fs-${drive.fileSystem.toLowerCase()}`;
+      const fsSlug = (drive.fileSystem || '').toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+      const fsClass = `pill-fs-${fsSlug}`;
       const fsLabel = drive.fileSystem;
 
       const barClass = usage.isCritical ? 'critical' : usage.isWarning ? 'warning' : '';
@@ -650,12 +669,22 @@ function renderDrivesWorkbench() {
       const usage = state.calculateDriveUsage(drive.id);
       const driveProjects = state.projects.filter(p => (p.drives || []).includes(drive.id));
       const matchingProjects = driveProjects.filter(p => filteredProjectIds.has(p.id));
+      matchingProjects.sort((a, b) => {
+        const clientA = (a.client || '').trim().toLowerCase();
+        const clientB = (b.client || '').trim().toLowerCase();
+        const comp = clientA.localeCompare(clientB, 'pt-BR', { sensitivity: 'base' });
+        if (comp !== 0) return comp;
+        const nameA = (a.name || '').trim().toLowerCase();
+        const nameB = (b.name || '').trim().toLowerCase();
+        return nameA.localeCompare(nameB, 'pt-BR', { sensitivity: 'base' });
+      });
 
       const isSSD = String(drive.type).toUpperCase() === 'SSD';
       const typeClass = isSSD ? 'pill-ssd' : 'pill-hd';
       const typeLabel = isSSD ? 'SSD' : 'HD';
 
-      const fsClass = `pill-fs-${drive.fileSystem.toLowerCase()}`;
+      const fsSlug = (drive.fileSystem || '').toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+      const fsClass = `pill-fs-${fsSlug}`;
       const fsLabel = drive.fileSystem;
 
       const barClass = usage.isCritical ? 'critical' : usage.isWarning ? 'warning' : '';

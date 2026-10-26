@@ -146,6 +146,7 @@
 .pill-fs-exfat,
 .pill-fs-apfs,
 .pill-fs-hfs,
+.pill-fs-macos-ext,
 .pill-fs-ntfs {
   background: rgba(255, 255, 255, 0.06);
   color: #d4d4d8;
@@ -183,8 +184,10 @@
   align-items: flex-start;
   gap: 18px;
   overflow-x: auto;
-  overflow-y: visible;
-  padding-bottom: 24px;
+  overflow-y: hidden;
+  flex: 1;
+  min-height: 0;
+  padding-bottom: 12px;
   width: 100%;
   scrollbar-width: thin;
   scrollbar-color: var(--border-default) var(--bg-surface-elevated);
@@ -219,6 +222,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  max-height: calc(100% - 6px);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   position: relative;
   box-shadow: var(--shadow-sm);
@@ -399,8 +403,8 @@
   display: flex;
   flex-direction: column;
   gap: 7px;
-  min-height: 140px;
-  max-height: calc(100vh - 350px);
+  min-height: 120px;
+  flex: 1;
   overflow-y: auto;
   position: relative;
   scrollbar-width: thin;
@@ -737,6 +741,37 @@ dialog::backdrop {
   flex-wrap: wrap;
   gap: 6px;
   min-height: 36px;
+/* ==========================================================================
+   REFORMULATED PROJECT TAG SYSTEM (Clean, Intuitive & Native Color Picker)
+   ========================================================================== */
+
+.project-tags-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.project-tags-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tags-subheading {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
+}
+
+.project-tags-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 38px;
   padding: 6px 10px;
   background-color: var(--bg-surface-elevated);
   border: 1px solid var(--border-default);
@@ -748,21 +783,21 @@ dialog::backdrop {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 8px;
+  padding: 4px 9px;
   border-radius: 4px;
   font-size: 11px;
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.2;
 }
 
 .btn-remove-selected-tag {
   background: none;
   border: none;
   color: inherit;
-  opacity: 0.65;
+  opacity: 0.7;
   cursor: pointer;
   padding: 0;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1;
   display: inline-flex;
   align-items: center;
@@ -773,16 +808,171 @@ dialog::backdrop {
   opacity: 1;
 }
 
-.tag-swatches-inline {
+/* Create New Tag Box */
+.new-tag-creation-box {
+  padding: 12px;
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
   display: flex;
-  gap: 4px;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.new-tag-inputs-row {
+  display: flex;
+  gap: 8px;
   align-items: center;
 }
 
-.tag-swatches-inline .color-swatch-btn {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
+.new-tag-inputs-row .form-input {
+  flex: 1;
+}
+
+.tag-color-picker-wrap {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.tag-color-picker-input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.tag-color-picker-input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.tag-color-picker-input::-webkit-color-swatch {
+  border: none;
+  border-radius: 3px;
+}
+
+.tag-color-picker-input::-moz-color-swatch {
+  border: none;
+  border-radius: 3px;
+}
+
+/* Tags Catalog & Manager Box */
+.tags-manager-box {
+  padding: 12px;
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.all-tags-manager-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 160px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.tag-manage-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-surface-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 3px 6px 3px 4px;
+  transition: all var(--transition-fast);
+}
+
+.tag-manage-item:hover {
+  border-color: var(--border-highlight);
+  background: var(--bg-surface-hover);
+}
+
+.tag-manage-item.is-assigned {
+  border-color: rgba(255, 187, 0, 0.4);
+  background: rgba(255, 187, 0, 0.05);
+}
+
+.tag-row-color-input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.tag-row-color-input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.tag-row-color-input::-webkit-color-swatch {
+  border: none;
+  border-radius: 3px;
+}
+
+.tag-row-color-input::-moz-color-swatch {
+  border: none;
+  border-radius: 3px;
+}
+
+.tag-name-btn {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.tag-name-btn:hover {
+  color: #ffbb00;
+}
+
+.tag-assigned-badge {
+  font-size: 9px;
+  font-weight: 800;
+  color: #10b981;
+}
+
+.btn-delete-tag-global {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  transition: color var(--transition-fast);
+}
+
+.btn-delete-tag-global:hover {
+  color: var(--accent-rose, #ef4444);
+  background: rgba(239, 68, 68, 0.1);
 }
 
 /* Floating Tooltip for At-Risk Projects */

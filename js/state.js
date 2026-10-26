@@ -31,7 +31,7 @@ class StateStore {
       let fs = d.fileSystem || 'exFAT';
       if (fs.toLowerCase() === 'exfat') fs = 'exFAT';
       else if (fs.toLowerCase() === 'apfs') fs = 'APFS';
-      else if (fs.toLowerCase() === 'hfs' || fs.toLowerCase() === 'hfs+') fs = 'HFS+';
+      else if (fs.toLowerCase() === 'hfs' || fs.toLowerCase() === 'hfs+' || fs.toLowerCase().includes('macos') || fs.toLowerCase().includes('ext')) fs = 'MacOS Ext.';
       else if (fs.toLowerCase() === 'ntfs') fs = 'NTFS';
 
       return {
@@ -172,6 +172,44 @@ class StateStore {
     this.notify();
   }
 
+  updateTagColor(tagName, color) {
+    if (!tagName) return;
+    const clean = tagName.trim();
+    if (!clean) return;
+    this.tags[clean] = color || '#ffbb00';
+    try {
+      localStorage.setItem('dms_tags_registry_v1', JSON.stringify(this.tags));
+    } catch(e) {}
+    this.notify();
+  }
+
+  deleteTag(tagName) {
+    if (!tagName) return;
+    const clean = tagName.trim();
+    if (!clean) return;
+
+    // Delete from registry
+    delete this.tags[clean];
+    try {
+      localStorage.setItem('dms_tags_registry_v1', JSON.stringify(this.tags));
+    } catch(e) {}
+
+    // Remove from all existing projects
+    let projectsModified = false;
+    for (const project of this.projects) {
+      if (Array.isArray(project.tags) && project.tags.includes(clean)) {
+        project.tags = project.tags.filter(t => t !== clean);
+        projectsModified = true;
+      }
+    }
+
+    if (projectsModified) {
+      this.saveProjects();
+    }
+
+    this.notify();
+  }
+
   getAllTags() {
     const tagSet = new Set(Object.keys(this.tags));
     for (const p of this.projects) {
@@ -179,7 +217,7 @@ class StateStore {
         if (t && t.trim()) tagSet.add(t.trim());
       }
     }
-    return Array.from(tagSet).sort((a, b) => a.localeCompare(b)).map(name => ({
+    return Array.from(tagSet).sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' })).map(name => ({
       name,
       color: this.getTagColor(name)
     }));
@@ -193,7 +231,7 @@ class StateStore {
     let fs = driveData.fileSystem || 'exFAT';
     if (fs.toLowerCase() === 'exfat') fs = 'exFAT';
     else if (fs.toLowerCase() === 'apfs') fs = 'APFS';
-    else if (fs.toLowerCase() === 'hfs' || fs.toLowerCase() === 'hfs+') fs = 'HFS+';
+    else if (fs.toLowerCase() === 'hfs' || fs.toLowerCase() === 'hfs+' || fs.toLowerCase().includes('macos') || fs.toLowerCase().includes('ext')) fs = 'MacOS Ext.';
     else if (fs.toLowerCase() === 'ntfs') fs = 'NTFS';
 
     const newDrive = {
@@ -223,7 +261,7 @@ class StateStore {
         let fs = sanitizedUpdates.fileSystem;
         if (fs.toLowerCase() === 'exfat') fs = 'exFAT';
         else if (fs.toLowerCase() === 'apfs') fs = 'APFS';
-        else if (fs.toLowerCase() === 'hfs' || fs.toLowerCase() === 'hfs+') fs = 'HFS+';
+        else if (fs.toLowerCase() === 'hfs' || fs.toLowerCase() === 'hfs+' || fs.toLowerCase().includes('macos') || fs.toLowerCase().includes('ext')) fs = 'MacOS Ext.';
         else if (fs.toLowerCase() === 'ntfs') fs = 'NTFS';
         sanitizedUpdates.fileSystem = fs;
       }

@@ -153,7 +153,7 @@ function renderModalSelectedTags() {
   if (currentModalProjectTags.length === 0) {
     container.innerHTML = `
       <div style="font-size:11px; color:var(--text-muted); font-style:italic; padding:4px 0;">
-        Nenhuma tag selecionada para este projeto.
+        Nenhuma tag atribuída a este projeto no momento.
       </div>
     `;
     return;
@@ -164,7 +164,7 @@ function renderModalSelectedTags() {
     return `
       <span class="selected-tag-pill" style="background:${color}22; color:${color}; border:1px solid ${color}55;">
         <span>${tag}</span>
-        <button type="button" class="btn-remove-selected-tag" data-tag="${tag}" title="Remover tag">✕</button>
+        <button type="button" class="btn-remove-selected-tag" data-tag="${tag}" title="Desvincular tag deste projeto">✕</button>
       </span>
     `;
   }).join('');
@@ -175,56 +175,97 @@ function renderModalSelectedTags() {
       const tagToRemove = btn.dataset.tag;
       currentModalProjectTags = currentModalProjectTags.filter(t => t !== tagToRemove);
       renderModalSelectedTags();
+      renderAllTagsManager();
     });
   });
 }
 
-function populateExistingTagsDropdown() {
-  const select = document.getElementById('project-existing-tags-select');
-  if (!select) return;
+function renderAllTagsManager() {
+  const container = document.getElementById('all-tags-manager-list');
+  if (!container) return;
 
   const allTags = state.getAllTags();
-  select.innerHTML = `
-    <option value="">-- Selecione uma tag existente (${allTags.length}) --</option>
-    ${allTags.map(t => `<option value="${t.name}">${t.name}</option>`).join('')}
-  `;
+  if (allTags.length === 0) {
+    container.innerHTML = `
+      <div style="font-size:11px; color:var(--text-muted); font-style:italic; padding:4px 0; width:100%;">
+        Nenhuma tag cadastrada no sistema. Crie uma nova tag acima.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = allTags.map(t => {
+    const isAssigned = currentModalProjectTags.includes(t.name);
+    return `
+      <div class="tag-manage-item ${isAssigned ? 'is-assigned' : ''}" data-tag="${t.name}">
+        <input type="color" class="tag-row-color-input" value="${t.color}" data-tag="${t.name}" title="Alterar a cor da tag '${t.name}'" />
+        <button type="button" class="tag-name-btn" data-tag="${t.name}" title="${isAssigned ? 'Tag vinculada (clique para desvincular)' : 'Clique para adicionar a este projeto'}">
+          <span class="tag-name-text">${t.name}</span>
+          ${isAssigned ? '<span class="tag-assigned-badge">✓</span>' : '<span style="opacity:0.6;">+</span>'}
+        </button>
+        <button type="button" class="btn-delete-tag-global" data-tag="${t.name}" title="Excluir tag '${t.name}' do sistema e de todos os projetos">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+        </button>
+      </div>
+    `;
+  }).join('');
+
+  // 1. Color Change Listeners on existing tags
+  container.querySelectorAll('.tag-row-color-input').forEach(input => {
+    input.addEventListener('input', (e) => {
+      const tagName = e.target.dataset.tag;
+      const newColor = e.target.value;
+      state.updateTagColor(tagName, newColor);
+      renderModalSelectedTags();
+    });
+  });
+
+  // 2. Click tag to toggle assignment to current project
+  container.querySelectorAll('.tag-name-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tagName = btn.dataset.tag;
+      if (currentModalProjectTags.includes(tagName)) {
+        currentModalProjectTags = currentModalProjectTags.filter(t => t !== tagName);
+      } else {
+        currentModalProjectTags.push(tagName);
+      }
+      renderModalSelectedTags();
+      renderAllTagsManager();
+    });
+  });
+
+  // 3. Delete tag permanently from system & projects
+  container.querySelectorAll('.btn-delete-tag-global').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const tagName = btn.dataset.tag;
+      if (confirm(`Deseja realmente excluir a tag "${tagName}" do sistema e de todos os projetos?`)) {
+        state.deleteTag(tagName);
+        currentModalProjectTags = currentModalProjectTags.filter(t => t !== tagName);
+        renderModalSelectedTags();
+        renderAllTagsManager();
+        showToast(`Tag "${tagName}" foi excluída.`);
+      }
+    });
+  });
 }
 
 function setupProjectModalTagEvents() {
   if (isTagEventsInitialized) return;
   isTagEventsInitialized = true;
 
-  // Existing tags select
-  const select = document.getElementById('project-existing-tags-select');
-  if (select) {
-    select.addEventListener('change', () => {
-      const val = select.value.trim();
-      if (val && !currentModalProjectTags.includes(val)) {
-        currentModalProjectTags.push(val);
-        renderModalSelectedTags();
-      }
-      select.value = '';
-    });
-  }
-
-  // Tag color swatches inline
-  document.querySelectorAll('#new-tag-color-swatches .color-swatch-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#new-tag-color-swatches .color-swatch-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      const colorInput = document.getElementById('new-tag-color-input');
-      if (colorInput) colorInput.value = btn.dataset.color;
-    });
-  });
-
-  // Add new tag button
+  // Add new tag button & input
   const addBtn = document.getElementById('btn-add-new-tag');
   const nameInput = document.getElementById('new-tag-name-input');
+  const colorPicker = document.getElementById('new-tag-color-picker');
+
   const handleAddNewTag = () => {
     if (!nameInput) return;
     const name = nameInput.value.trim();
-    const colorInput = document.getElementById('new-tag-color-input');
-    const color = colorInput ? colorInput.value : '#ffbb00';
+    const color = colorPicker ? colorPicker.value : '#ffbb00';
 
     if (!name) {
       showToast('Digite o nome da nova tag.', 'warning');
@@ -237,7 +278,7 @@ function setupProjectModalTagEvents() {
       currentModalProjectTags.push(name);
     }
     renderModalSelectedTags();
-    populateExistingTagsDropdown();
+    renderAllTagsManager();
     nameInput.value = '';
     showToast(`Tag "${name}" criada e adicionada!`);
   };
@@ -280,7 +321,7 @@ export function openProjectModal(projectToEdit = null, preselectedDriveId = null
   setupProjectModalTagEvents();
   currentModalProjectTags = isEdit ? [...(projectToEdit.tags || [])] : [];
   renderModalSelectedTags();
-  populateExistingTagsDropdown();
+  renderAllTagsManager();
   const newTagNameInput = document.getElementById('new-tag-name-input');
   if (newTagNameInput) newTagNameInput.value = '';
 

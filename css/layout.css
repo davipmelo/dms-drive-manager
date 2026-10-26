@@ -668,6 +668,7 @@
 /* Unassigned Projects Section in Workbench */
 .unassigned-projects-section {
   margin-bottom: 24px;
+  flex-shrink: 0;
 }
 
 .unassigned-banner {
@@ -698,9 +699,12 @@
 /* Content Area */
 .app-main {
   flex: 1;
-  overflow-y: auto;
-  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 20px 24px 0 24px;
   background-color: var(--bg-app);
+  min-height: 0;
 }
 
 .view-section {
@@ -708,7 +712,16 @@
 }
 
 .view-section.active {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+
+#view-table.view-section.active {
+  overflow-y: auto;
+  padding-bottom: 24px;
 }
 
 /* Section Headers */
@@ -719,6 +732,7 @@
   margin-bottom: 20px;
   flex-wrap: wrap;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .section-title {
@@ -809,6 +823,10 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 24px;
 }
 
 .drive-list-card {
