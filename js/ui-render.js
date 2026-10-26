@@ -476,7 +476,7 @@ function renderDrivesWorkbench() {
   if (visibleDrives.length === 0) {
     container.className = state.workbenchLayout === 'list' ? 'drives-list-container' : 'drives-grid';
     container.innerHTML = `
-      <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-muted);">
+      <div style="width: 100%; text-align: center; padding: 60px 20px; color: var(--text-muted); flex: 1;">
         <p style="font-size: 15px; margin-bottom: 12px; color: var(--text-secondary);">
           ${isSearchActive ? `Nenhum drive ou projeto encontrado para "${state.filters.searchQuery}".` : 'Nenhum drive encontrado com os filtros selecionados.'}
         </p>

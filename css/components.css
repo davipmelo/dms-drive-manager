@@ -178,20 +178,48 @@
    ========================================================================== */
 
 .drives-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 20px;
-  align-items: start;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 18px;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding-bottom: 24px;
+  width: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) var(--bg-surface-elevated);
+}
+
+.drives-grid::-webkit-scrollbar {
+  height: 8px;
+}
+
+.drives-grid::-webkit-scrollbar-track {
+  background: var(--bg-surface-elevated);
+  border-radius: var(--radius-full);
+}
+
+.drives-grid::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: var(--radius-full);
+}
+
+.drives-grid::-webkit-scrollbar-thumb:hover {
+  background: #ffbb00;
 }
 
 .drive-card {
+  flex: 0 0 330px;
+  width: 330px;
+  min-width: 330px;
+  max-width: 330px;
   background-color: var(--bg-surface-card);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: all var(--transition-normal);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   position: relative;
   box-shadow: var(--shadow-sm);
 }
@@ -367,14 +395,33 @@
 
 /* Projects Container inside Drive Card */
 .drive-projects-list {
-  padding: 12px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 7px;
   min-height: 140px;
-  max-height: 480px;
+  max-height: calc(100vh - 350px);
   overflow-y: auto;
   position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-subtle) transparent;
+}
+
+.drive-projects-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.drive-projects-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.drive-projects-list::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: var(--radius-full);
+}
+
+.drive-projects-list::-webkit-scrollbar-thumb:hover {
+  background: #ffbb00;
 }
 
 .drive-projects-list.empty-state {
