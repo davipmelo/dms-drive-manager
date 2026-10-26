@@ -94,26 +94,22 @@ class FirebaseService {
 
     // Realtime Drives
     const drivesUnsub = onSnapshot(collection(this.db, 'drives'), (snapshot) => {
-      if (!snapshot.empty) {
-        const cloudDrives = [];
-        snapshot.forEach((doc) => {
-          cloudDrives.push({ id: doc.id, ...doc.data() });
-        });
-        state.drives = cloudDrives;
-        state.notify();
-      }
+      const cloudDrives = [];
+      snapshot.forEach((doc) => {
+        cloudDrives.push({ id: doc.id, ...doc.data() });
+      });
+      state.drives = cloudDrives;
+      state.notify();
     }, (err) => console.warn('Erro ao sincronizar drives:', err));
 
     // Realtime Projects
     const projectsUnsub = onSnapshot(collection(this.db, 'projects'), (snapshot) => {
-      if (!snapshot.empty) {
-        const cloudProjects = [];
-        snapshot.forEach((doc) => {
-          cloudProjects.push({ id: doc.id, ...doc.data() });
-        });
-        state.projects = cloudProjects;
-        state.notify();
-      }
+      const cloudProjects = [];
+      snapshot.forEach((doc) => {
+        cloudProjects.push({ id: doc.id, ...doc.data() });
+      });
+      state.projects = cloudProjects;
+      state.notify();
     }, (err) => console.warn('Erro ao sincronizar projetos:', err));
 
     this.unsubscribers.push(drivesUnsub, projectsUnsub);

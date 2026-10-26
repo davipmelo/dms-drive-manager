@@ -521,6 +521,40 @@ function renderDrivesWorkbench() {
     return true;
   });
 
+  // If no drives exist at all in the system, show clean onboarding empty state
+  if (state.drives.length === 0) {
+    container.className = 'drives-empty-state-wrap';
+    container.innerHTML = `
+      <div class="empty-state-card">
+        <div class="empty-state-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+            <line x1="6" y1="6" x2="6.01" y2="6"></line>
+            <line x1="6" y1="18" x2="6.01" y2="18"></line>
+          </svg>
+        </div>
+        <h3 class="empty-state-title">Nenhum drive cadastrado ainda</h3>
+        <p class="empty-state-desc">
+          Cadastre seus HDs externos, SSDs portáteis ou storages para começar a organizar seus projetos de vídeo e monitorar a capacidade de armazenamento.
+        </p>
+        <button type="button" class="btn btn-primary" id="btn-empty-add-drive">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>Cadastrar Primeiro Drive</span>
+        </button>
+      </div>
+    `;
+    const addDriveBtn = document.getElementById('btn-empty-add-drive');
+    if (addDriveBtn) {
+      addDriveBtn.addEventListener('click', () => openDriveModal());
+    }
+    return;
+  }
+
+  // If drives exist but none match active filters
   if (visibleDrives.length === 0) {
     container.className = state.workbenchLayout === 'list' ? 'drives-list-container' : 'drives-grid';
     container.innerHTML = `
@@ -965,14 +999,60 @@ function renderProjectsTable() {
 
   const projects = state.getFilteredProjects();
 
-  if (projects.length === 0) {
+  // If no projects exist at all in the system, show clean onboarding empty state
+  if (state.projects.length === 0) {
     tableBody.innerHTML = `
       <tr>
-        <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">
-          Nenhum projeto encontrado.
+        <td colspan="7" style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+          <div class="empty-state-card" style="max-width: 440px; margin: 0 auto; background: transparent; border: none; padding: 0;">
+            <div class="empty-state-icon" style="width: 50px; height: 50px; margin: 0 auto 14px;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+            </div>
+            <h3 class="empty-state-title" style="font-size: 15px;">Nenhum projeto cadastrado ainda</h3>
+            <p class="empty-state-desc" style="font-size: 12px; margin-bottom: 18px;">
+              Cadastre suas produções, comerciais ou diárias para controlar em quais drives estão salvos e garantir a segurança de backup.
+            </p>
+            <button type="button" class="btn btn-primary btn-sm" id="btn-empty-add-project" style="margin: 0 auto;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>Cadastrar Primeiro Projeto</span>
+            </button>
+          </div>
         </td>
       </tr>
     `;
+    const addProjBtn = document.getElementById('btn-empty-add-project');
+    if (addProjBtn) {
+      addProjBtn.addEventListener('click', () => openProjectModal());
+    }
+    return;
+  }
+
+  // If projects exist but none match active filters
+  if (projects.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align: center; padding: 48px 20px; color: var(--text-muted);">
+          <p style="font-size: 14px; margin-bottom: 12px; color: var(--text-secondary);">Nenhum projeto encontrado com os filtros selecionados.</p>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-table-reset-filters">Limpar Filtros</button>
+        </td>
+      </tr>
+    `;
+    const resetBtn = document.getElementById('btn-table-reset-filters');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        state.resetFilters();
+        const searchInput = document.getElementById('global-search-input');
+        if (searchInput) searchInput.value = '';
+      });
+    }
     return;
   }
 

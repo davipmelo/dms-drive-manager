@@ -6,9 +6,10 @@
 import { INITIAL_DRIVES, INITIAL_PROJECTS } from './sample-data.js';
 
 const STORAGE_KEYS = {
-  DRIVES: 'dms_drives_data_v1',
-  PROJECTS: 'dms_projects_data_v1',
-  USER: 'dms_user_session_v1',
+  DRIVES: 'dms_drives_data_v2',
+  PROJECTS: 'dms_projects_data_v2',
+  USER: 'dms_user_session_v2',
+  TAGS: 'dms_tags_registry_v2',
   FIREBASE_CONFIG: 'dms_firebase_cfg_v1'
 };
 
@@ -19,10 +20,10 @@ class StateStore {
     this.activeView = 'drives'; // 'drives' | 'table'
     this.workbenchLayout = this.loadFromLocalStorage('dms_workbench_layout_v1', 'grid'); // 'grid' | 'list'
     
-    // Load local cache or fallback to initial video sample data
+    // Load local cache or fallback to initial empty state (100% clean)
     const loadedDrives = this.loadFromLocalStorage(STORAGE_KEYS.DRIVES, INITIAL_DRIVES);
     // Sanitize drive types: literally only 'HD' and 'SSD'
-    this.drives = loadedDrives.map(d => {
+    this.drives = (Array.isArray(loadedDrives) ? loadedDrives : []).map(d => {
       let cleanType = 'HD';
       const rawType = String(d.type || '').toUpperCase();
       if (rawType === 'SSD' || rawType === 'NVME') cleanType = 'SSD';
@@ -46,33 +47,20 @@ class StateStore {
     });
 
     const loadedProjects = this.loadFromLocalStorage(STORAGE_KEYS.PROJECTS, INITIAL_PROJECTS);
-    this.projects = loadedProjects.map(p => ({
+    this.projects = (Array.isArray(loadedProjects) ? loadedProjects : []).map(p => ({
       ...p,
       drives: Array.isArray(p.drives) ? p.drives : []
     }));
 
     this.currentUser = this.loadFromLocalStorage(STORAGE_KEYS.USER, {
-      name: 'Editor Convidado',
-      email: 'editor@produtora.com',
+      name: 'Editor',
+      email: '',
       avatar: '🎬',
       isGuest: true
     });
 
-    // Tag Registry (tagName -> hex color)
-    this.tags = this.loadFromLocalStorage('dms_tags_registry_v1', {
-      '6K RAW': '#ffbb00',
-      'DaVinci': '#8b5cf6',
-      'Comercial': '#f59e0b',
-      'ProRes 422': '#3b82f6',
-      'Doc': '#10b981',
-      'Premiere': '#8b5cf6',
-      'Sony FX3': '#06b6d4',
-      'XAVC-S': '#3b82f6',
-      'After Effects': '#8b5cf6',
-      '4K ProRes HQ': '#ffbb00',
-      'Institucional': '#10b981',
-      'Arquivado': '#71717a'
-    });
+    // Tag Registry (tagName -> hex color) - 100% clean by default
+    this.tags = this.loadFromLocalStorage(STORAGE_KEYS.TAGS, {});
 
     // Active filters
     this.filters = {
@@ -100,7 +88,7 @@ class StateStore {
         localStorage.setItem(STORAGE_KEYS.DRIVES, JSON.stringify(this.drives));
         localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(this.projects));
         localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(this.currentUser));
-        localStorage.setItem('dms_tags_registry_v1', JSON.stringify(this.tags));
+        localStorage.setItem(STORAGE_KEYS.TAGS, JSON.stringify(this.tags));
       } catch (e) {
         console.warn('LocalStorage save error:', e);
       }
@@ -167,7 +155,7 @@ class StateStore {
     if (!clean) return;
     this.tags[clean] = color || '#ffbb00';
     try {
-      localStorage.setItem('dms_tags_registry_v1', JSON.stringify(this.tags));
+      localStorage.setItem(STORAGE_KEYS.TAGS, JSON.stringify(this.tags));
     } catch(e) {}
     this.notify();
   }
@@ -178,7 +166,7 @@ class StateStore {
     if (!clean) return;
     this.tags[clean] = color || '#ffbb00';
     try {
-      localStorage.setItem('dms_tags_registry_v1', JSON.stringify(this.tags));
+      localStorage.setItem(STORAGE_KEYS.TAGS, JSON.stringify(this.tags));
     } catch(e) {}
     this.notify();
   }
@@ -191,7 +179,7 @@ class StateStore {
     // Delete from registry
     delete this.tags[clean];
     try {
-      localStorage.setItem('dms_tags_registry_v1', JSON.stringify(this.tags));
+      localStorage.setItem(STORAGE_KEYS.TAGS, JSON.stringify(this.tags));
     } catch(e) {}
 
     // Remove from all existing projects

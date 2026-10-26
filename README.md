@@ -116,7 +116,7 @@ dms-drive-manager/
 │   └── charts.css          # Gráfico Donut SVG, barras de progresso e tabela de projetos
 ├── js/
 │   ├── state.js            # Store reativo, cálculos de capacidade e filtros
-│   ├── sample-data.js      # Dados iniciais realistas de produtora de vídeo
+│   ├── sample-data.js      # Estrutura base de dados (100% limpo para novos usuários)
 │   ├── firebase-service.js # Integração com Firestore Realtime e Auth
 │   ├── drag-drop.js        # Motor nativo de Drag and Drop entre discos
 │   ├── modals.js           # Gerenciadores de formulários e caixas de diálogo
