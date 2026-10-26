@@ -340,42 +340,45 @@
             <label class="form-label">Tags do Projeto</label>
             <input type="hidden" id="project-tags-input" value="" />
             
-            <!-- Tags Selected for Current Project -->
-            <div class="project-tags-section">
-              <div class="project-tags-section-header">
-                <span class="tags-subheading">Tags Atribuídas a Este Projeto</span>
-                <span class="form-hint">Clique no ✕ para desvincular</span>
-              </div>
-              <div id="project-selected-tags-box" class="project-tags-chips-container">
-                <!-- Dynamically populated selected tag pills with (X) button -->
-              </div>
-            </div>
-
-            <!-- Create New Tag with Native Color Picker (No predefined colors) -->
-            <div class="new-tag-creation-box">
-              <div class="project-tags-section-header">
-                <span class="tags-subheading">Criar Nova Tag</span>
-                <span class="form-hint">Defina o nome e escolha qualquer cor personalizada</span>
-              </div>
-              <div class="new-tag-inputs-row">
-                <input type="text" id="new-tag-name-input" class="form-input" placeholder="Nome da nova tag..." />
-                <div class="tag-color-picker-wrap" title="Escolha a cor da tag">
-                  <input type="color" id="new-tag-color-picker" class="tag-color-picker-input" value="#ffbb00" />
+            <div class="project-tags-manager-container">
+              <!-- 1. Tags Atribuídas ao Projeto Atual -->
+              <div class="tag-section-block">
+                <div class="tag-section-header">
+                  <span class="tag-section-title">Tags Deste Projeto</span>
+                  <span class="tag-section-hint">Clique no ✕ para desvincular</span>
                 </div>
-                <button type="button" id="btn-add-new-tag" class="btn btn-secondary btn-sm">
-                  + Criar Tag
-                </button>
+                <div id="project-selected-tags-box" class="project-tags-chips-container">
+                  <!-- Dynamically populated selected tag pills with (X) button -->
+                </div>
               </div>
-            </div>
 
-            <!-- Existing Tags Catalog & Manager -->
-            <div class="tags-manager-box">
-              <div class="project-tags-section-header">
-                <span class="tags-subheading">Tags Cadastradas no Sistema</span>
-                <span class="form-hint">Clique na tag para adicionar • Altere a cor ou exclua</span>
+              <!-- 2. Criar Nova Tag: Nome -> Seletor de cor à direita -> Botão Criar Tag -->
+              <div class="tag-section-block">
+                <div class="tag-section-header">
+                  <span class="tag-section-title">Criar Nova Tag</span>
+                  <span class="tag-section-hint">Defina o nome e selecione a cor à direita</span>
+                </div>
+                <div class="new-tag-inputs-row">
+                  <input type="text" id="new-tag-name-input" class="form-input" placeholder="Ex: 8K RAW, Urgente, Red Bull..." />
+                  <div class="new-tag-color-field" title="Clique para escolher a cor desta nova tag">
+                    <input type="color" id="new-tag-color-picker" value="#ffbb00" />
+                    <span id="new-tag-color-preview" class="color-preview-circle" style="background: #ffbb00;"></span>
+                  </div>
+                  <button type="button" id="btn-add-new-tag" class="btn btn-secondary btn-sm">
+                    + Criar Tag
+                  </button>
+                </div>
               </div>
-              <div id="all-tags-manager-list" class="all-tags-manager-list">
-                <!-- Dynamically rendered list of all tags with color preview/picker, click-to-add and delete button -->
+
+              <!-- 3. Catálogo de Tags Cadastradas no Sistema -->
+              <div class="tag-section-block">
+                <div class="tag-section-header">
+                  <span class="tag-section-title">Tags Disponíveis no Sistema</span>
+                  <span class="tag-section-hint">Clique para vincular • Altere a cor na bolinha</span>
+                </div>
+                <div id="all-tags-manager-list" class="all-tags-manager-list">
+                  <!-- Dynamically rendered badge chips -->
+                </div>
               </div>
             </div>
           </div>

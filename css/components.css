@@ -736,40 +736,55 @@ dialog::backdrop {
 }
 
 /* ==========================================================================
-   REFORMULATED PROJECT TAG SYSTEM (Clean, Intuitive & Native Color Picker)
+   REFORMULATED PROJECT TAG SYSTEM (Clean, Modern & Dark Theme Cohesive)
    ========================================================================== */
 
-.project-tags-section {
+.project-tags-manager-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 12px;
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
 }
 
-.project-tags-section-header {
+.tag-section-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tag-section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
 
-.tags-subheading {
-  font-size: 11px;
+.tag-section-title {
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-primary);
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
 }
 
+.tag-section-hint {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* 1. Assigned Tags Container */
 .project-tags-chips-container {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   min-height: 38px;
   padding: 6px 10px;
-  background-color: var(--bg-surface-elevated);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
+  background-color: var(--bg-surface-card);
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-sm);
   align-items: center;
 }
 
@@ -777,11 +792,12 @@ dialog::backdrop {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 9px;
+  padding: 3px 8px;
   border-radius: 4px;
   font-size: 11px;
   font-weight: 700;
   line-height: 1.2;
+  transition: all var(--transition-fast);
 }
 
 .btn-remove-selected-tag {
@@ -791,182 +807,215 @@ dialog::backdrop {
   opacity: 0.7;
   cursor: pointer;
   padding: 0;
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: opacity var(--transition-fast);
 }
 
 .btn-remove-selected-tag:hover {
   opacity: 1;
 }
 
-/* Create New Tag Box */
-.new-tag-creation-box {
-  padding: 12px;
-  background-color: var(--bg-surface-elevated);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
+/* 2. Create New Tag Row: Input -> Color Picker on right -> Button */
 .new-tag-inputs-row {
   display: flex;
   gap: 8px;
   align-items: center;
+  width: 100%;
 }
 
 .new-tag-inputs-row .form-input {
   flex: 1;
+  height: 36px;
+  font-size: 12px;
 }
 
-.tag-color-picker-wrap {
+.new-tag-color-field {
   position: relative;
   width: 36px;
   height: 36px;
   flex-shrink: 0;
-}
-
-.tag-color-picker-input {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
-  background: transparent;
-  cursor: pointer;
-  padding: 2px;
-}
-
-.tag-color-picker-input::-webkit-color-swatch-wrapper {
-  padding: 0;
-}
-
-.tag-color-picker-input::-webkit-color-swatch {
-  border: none;
-  border-radius: 3px;
-}
-
-.tag-color-picker-input::-moz-color-swatch {
-  border: none;
-  border-radius: 3px;
-}
-
-/* Tags Catalog & Manager Box */
-.tags-manager-box {
-  padding: 12px;
-  background-color: var(--bg-surface-elevated);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background-color: var(--bg-surface-card);
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
+.new-tag-color-field:hover {
+  border-color: var(--accent-yellow);
+}
+
+.new-tag-color-field input[type="color"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.color-preview-circle {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  transition: transform var(--transition-fast);
+}
+
+.new-tag-color-field:hover .color-preview-circle {
+  transform: scale(1.1);
+}
+
+.new-tag-inputs-row .btn {
+  height: 36px;
+  padding: 0 14px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* 3. System Tags Catalog List */
 .all-tags-manager-list {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  max-height: 160px;
+  max-height: 140px;
   overflow-y: auto;
-  padding-right: 4px;
+  padding: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-subtle) transparent;
 }
 
-.tag-manage-item {
+.all-tags-manager-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.all-tags-manager-list::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: var(--radius-full);
+}
+
+.system-tag-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--bg-surface-card);
+  background-color: var(--bg-surface-card);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
-  padding: 3px 6px 3px 4px;
+  padding: 3px 6px 3px 7px;
   transition: all var(--transition-fast);
+  user-select: none;
 }
 
-.tag-manage-item:hover {
+.system-tag-chip:hover {
   border-color: var(--border-highlight);
-  background: var(--bg-surface-hover);
+  background-color: var(--bg-surface-hover);
 }
 
-.tag-manage-item.is-assigned {
-  border-color: rgba(255, 187, 0, 0.4);
-  background: rgba(255, 187, 0, 0.05);
+.system-tag-chip.is-assigned {
+  border-color: rgba(255, 187, 0, 0.45);
+  background-color: rgba(255, 187, 0, 0.08);
 }
 
-.tag-row-color-input {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border: none;
-  border-radius: 3px;
-  background: transparent;
-  cursor: pointer;
-  padding: 0;
+.tag-color-swatch-wrap {
+  position: relative;
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.tag-row-color-input::-webkit-color-swatch-wrapper {
+.tag-color-swatch-wrap input[type="color"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  margin: 0;
   padding: 0;
+  border: none;
 }
 
-.tag-row-color-input::-webkit-color-swatch {
-  border: none;
-  border-radius: 3px;
+.tag-swatch-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  transition: transform var(--transition-fast);
 }
 
-.tag-row-color-input::-moz-color-swatch {
-  border: none;
-  border-radius: 3px;
+.tag-color-swatch-wrap:hover .tag-swatch-dot {
+  transform: scale(1.15);
 }
 
-.tag-name-btn {
-  background: none;
-  border: none;
-  color: var(--text-primary);
+.tag-toggle-btn {
+  background: transparent !important;
+  border: none !important;
+  color: var(--text-primary) !important;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 2px 4px;
-  border-radius: 3px;
+  padding: 0;
+  margin: 0;
+  line-height: 1.2;
 }
 
-.tag-name-btn:hover {
-  color: #ffbb00;
+.tag-toggle-btn:hover {
+  color: var(--accent-yellow) !important;
 }
 
-.tag-assigned-badge {
-  font-size: 9px;
+.tag-check-icon {
+  font-size: 10px;
   font-weight: 800;
-  color: #10b981;
+  color: var(--accent-yellow);
 }
 
-.btn-delete-tag-global {
-  background: none;
-  border: none;
+.tag-add-icon {
+  font-size: 11px;
   color: var(--text-muted);
+}
+
+.tag-delete-btn {
+  background: transparent !important;
+  border: none !important;
+  color: var(--text-muted) !important;
   cursor: pointer;
-  padding: 2px 3px;
+  padding: 2px;
+  margin: 0 0 0 2px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 3px;
-  transition: color var(--transition-fast);
+  opacity: 0.5;
+  transition: all var(--transition-fast);
 }
 
-.btn-delete-tag-global:hover {
-  color: var(--accent-rose, #ef4444);
-  background: rgba(239, 68, 68, 0.1);
+.tag-delete-btn:hover {
+  opacity: 1;
+  color: var(--accent-rose, #ef4444) !important;
+  background-color: rgba(239, 68, 68, 0.15) !important;
 }
 
 /* Floating Tooltip for At-Risk Projects */

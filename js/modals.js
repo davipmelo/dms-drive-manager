@@ -187,7 +187,7 @@ function renderAllTagsManager() {
   const allTags = state.getAllTags();
   if (allTags.length === 0) {
     container.innerHTML = `
-      <div style="font-size:11px; color:var(--text-muted); font-style:italic; padding:4px 0; width:100%;">
+      <div style="font-size:11px; color:var(--text-muted); font-style:italic; padding:6px 2px; width:100%;">
         Nenhuma tag cadastrada no sistema. Crie uma nova tag acima.
       </div>
     `;
@@ -197,16 +197,19 @@ function renderAllTagsManager() {
   container.innerHTML = allTags.map(t => {
     const isAssigned = currentModalProjectTags.includes(t.name);
     return `
-      <div class="tag-manage-item ${isAssigned ? 'is-assigned' : ''}" data-tag="${t.name}">
-        <input type="color" class="tag-row-color-input" value="${t.color}" data-tag="${t.name}" title="Alterar a cor da tag '${t.name}'" />
-        <button type="button" class="tag-name-btn" data-tag="${t.name}" title="${isAssigned ? 'Tag vinculada (clique para desvincular)' : 'Clique para adicionar a este projeto'}">
-          <span class="tag-name-text">${t.name}</span>
-          ${isAssigned ? '<span class="tag-assigned-badge">✓</span>' : '<span style="opacity:0.6;">+</span>'}
+      <div class="system-tag-chip ${isAssigned ? 'is-assigned' : ''}" data-tag="${t.name}">
+        <div class="tag-color-swatch-wrap" title="Clique para alterar a cor da tag '${t.name}'">
+          <input type="color" class="tag-row-color-input" value="${t.color}" data-tag="${t.name}">
+          <span class="tag-swatch-dot" style="background: ${t.color};"></span>
+        </div>
+        <button type="button" class="tag-toggle-btn" data-tag="${t.name}" title="${isAssigned ? 'Tag vinculada (clique para remover deste projeto)' : 'Clique para adicionar a este projeto'}">
+          <span>${t.name}</span>
+          ${isAssigned ? '<span class="tag-check-icon">✓</span>' : '<span class="tag-add-icon">+</span>'}
         </button>
-        <button type="button" class="btn-delete-tag-global" data-tag="${t.name}" title="Excluir tag '${t.name}' do sistema e de todos os projetos">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="3 6 5 6 21 6"></polyline>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        <button type="button" class="tag-delete-btn" data-tag="${t.name}" title="Excluir tag '${t.name}' do sistema e de todos os projetos">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
       </div>
@@ -219,12 +222,17 @@ function renderAllTagsManager() {
       const tagName = e.target.dataset.tag;
       const newColor = e.target.value;
       state.updateTagColor(tagName, newColor);
+      const chip = input.closest('.system-tag-chip');
+      if (chip) {
+        const dot = chip.querySelector('.tag-swatch-dot');
+        if (dot) dot.style.background = newColor;
+      }
       renderModalSelectedTags();
     });
   });
 
   // 2. Click tag to toggle assignment to current project
-  container.querySelectorAll('.tag-name-btn').forEach(btn => {
+  container.querySelectorAll('.tag-toggle-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const tagName = btn.dataset.tag;
       if (currentModalProjectTags.includes(tagName)) {
@@ -238,7 +246,7 @@ function renderAllTagsManager() {
   });
 
   // 3. Delete tag permanently from system & projects
-  container.querySelectorAll('.btn-delete-tag-global').forEach(btn => {
+  container.querySelectorAll('.tag-delete-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const tagName = btn.dataset.tag;
@@ -261,6 +269,13 @@ function setupProjectModalTagEvents() {
   const addBtn = document.getElementById('btn-add-new-tag');
   const nameInput = document.getElementById('new-tag-name-input');
   const colorPicker = document.getElementById('new-tag-color-picker');
+  const colorPreview = document.getElementById('new-tag-color-preview');
+
+  if (colorPicker && colorPreview) {
+    colorPicker.addEventListener('input', (e) => {
+      colorPreview.style.background = e.target.value;
+    });
+  }
 
   const handleAddNewTag = () => {
     if (!nameInput) return;
@@ -324,6 +339,10 @@ export function openProjectModal(projectToEdit = null, preselectedDriveId = null
   renderAllTagsManager();
   const newTagNameInput = document.getElementById('new-tag-name-input');
   if (newTagNameInput) newTagNameInput.value = '';
+  const newTagColorPicker = document.getElementById('new-tag-color-picker');
+  const newTagColorPreview = document.getElementById('new-tag-color-preview');
+  if (newTagColorPicker) newTagColorPicker.value = '#ffbb00';
+  if (newTagColorPreview) newTagColorPreview.style.background = '#ffbb00';
 
   document.getElementById('project-notes-input').value = isEdit ? (projectToEdit.notes || '') : '';
 
