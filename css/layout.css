@@ -35,12 +35,12 @@
   width: 36px;
   height: 36px;
   border-radius: var(--radius-md);
-  background: var(--gradient-accent);
+  background: #ffbb00;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  box-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
+  color: #08080a;
+  box-shadow: 0 0 16px rgba(255, 187, 0, 0.35);
 }
 
 .brand-info h1 {
@@ -51,18 +51,6 @@
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.brand-badge {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 2px 6px;
-  border-radius: var(--radius-full);
-  background: rgba(56, 189, 248, 0.15);
-  color: var(--text-accent);
-  border: 1px solid rgba(56, 189, 248, 0.3);
 }
 
 .brand-info p {
@@ -739,9 +727,252 @@
 }
 
 .section-subtitle {
+/* View Mode Toggle (Grade / Lista) */
+.view-mode-toggle {
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  gap: 2px;
+}
+
+.view-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
   font-size: 12px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.view-mode-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-surface-hover);
+}
+
+.view-mode-btn.active {
+  background-color: #ffbb00;
+  color: #08080a;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   DRIVES LIST VIEW LAYOUT (Visão em Lista Limpa e Intuitiva)
+   ========================================================================== */
+
+.drives-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.drive-list-card {
+  background-color: var(--bg-surface-card);
+  border: 1px solid var(--border-default);
+  border-left: 4px solid var(--drive-color, #ffbb00);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: all var(--transition-fast);
+}
+
+.drive-list-card:hover {
+  border-color: var(--border-highlight);
+  box-shadow: var(--shadow-sm);
+}
+
+.drive-list-card.drag-target-over {
+  border-color: #ffbb00;
+  box-shadow: 0 0 20px rgba(255, 187, 0, 0.3);
+  background-color: rgba(255, 187, 0, 0.03);
+}
+
+.drive-list-header {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.drive-list-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 220px;
+  flex: 1;
+}
+
+.drive-list-color-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.drive-list-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.drive-list-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.drive-list-center {
+  flex: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 200px;
+  max-width: 380px;
+}
+
+.drive-list-cap-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
   color: var(--text-muted);
-  margin-top: 2px;
+}
+
+.drive-list-cap-meta strong {
+  color: var(--text-primary);
+}
+
+.drive-list-bar-track {
+  height: 6px;
+  width: 100%;
+  background-color: var(--bg-surface-elevated);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.drive-list-bar-fill {
+  height: 100%;
+  background: var(--gradient-safe);
+  border-radius: var(--radius-full);
+  transition: width 0.4s ease;
+}
+
+.drive-list-bar-fill.warning {
+  background: var(--gradient-warning);
+}
+
+.drive-list-bar-fill.critical {
+  background: var(--gradient-critical);
+}
+
+.drive-list-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-toggle-drive-projects {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-toggle-drive-projects:hover {
+  background-color: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+.drive-list-body {
+  border-top: 1px solid var(--border-subtle);
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 10px 14px;
+}
+
+.drive-list-projects-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.project-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  cursor: grab;
+  transition: all var(--transition-fast);
+}
+
+.project-list-row:hover {
+  background-color: var(--bg-surface-hover);
+  border-color: var(--border-highlight);
+}
+
+.project-list-row.is-dragging {
+  opacity: 0.4;
+}
+
+.project-list-left-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.project-list-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.project-list-client {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.project-list-size {
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(255, 187, 0, 0.12);
+  color: #ffbb00;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.project-list-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 /* Responsive tweaks */

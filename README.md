@@ -18,30 +18,31 @@ Em vez de precisar plugar drive por drive no computador para saber o que está g
 
 ## ⚡ Principais Funcionalidades
 
-### 1. 🗄️ Workbench Visual com Drag & Drop
-- Visualize todos os seus HDs e SSDs em cartões intuitivos com barras de capacidade dinâmica.
-- **Arraste e solte** cartões de projetos entre os drives para **Transferir (Mover)** ou **Duplicar (Criar Backup)**.
-- Menus rápidos para quem prefere não arrastar: botão direto *"Mover / Duplicar ➔"*.
+### 1. 🗄️ Workbench Visual com Modos de Exibição (Grade & Lista)
+- Alterne entre a **Visualização em Grade** e a **Visualização em Lista** limpa e intuitiva com um clique.
+- **Arraste e solte** cartões de projetos entre os drives para **Transferir (Mover)** ou **Duplicar (Criar Backup)** em ambos os modos.
+- Remova projetos de drives específicos com o botão dedicado *"Remover do Drive"*, mantendo-os preservados no catálogo geral.
 
 ### 2. 🛡️ Alerta Automático de Cópia Única (Regra de Backup 3-2-1)
-- **`⚠️ Cópia Única (Risco)`**: O sistema identifica automaticamente projetos salvos em apenas 1 drive físico e acende um badge de alerta.
-- **`🛡️ 2+ Cópias (Seguro)`**: Mostra quais projetos já possuem backup replicado em outros discos.
+- **`Cópia Única`**: O sistema identifica automaticamente projetos salvos em apenas 1 drive físico e sinaliza a necessidade de backup.
+- **`2+ Cópias`**: Mostra quais projetos já possuem backup replicado em outros discos.
 
 ### 3. 📊 Dashboard de Armazenamento Sempre Visível na Sidebar
-- Gráfico Donut SVG compacto com porcentagem total ocupada x livre em todo o estúdio.
+- Gráfico Donut SVG compacto com porcentagem total ocupada x livre em todo o estúdio com destaques em amarelo (`#ffbb00`).
 - Ocupação detalhada por HD e SSD em tempo real ao lado das suas tarefas diárias.
 - Indicador de saúde geral do backup da produtora.
 
-### 4. 🌪️ Filtros Sob Demanda no Workbench
-- Filtros elegantes através de botão flutuante no canto superior do Workbench, liberando a interface.
-- Filtre por **Segurança** (projetos sem backup), **Tipo de Mídia** (HD e SSD) e **Cliente**.
+### 4. 🌪️ Filtros Organizados em Ordem Alfabética
+- Filtros elegantes através de popover flutuante no canto superior do Workbench, liberando a interface.
+- Todos os campos e opções organizados em ordem alfabética e sem poluição de emojis: **Clientes**, **Segurança de Dados** e **Tipo de Mídia** (HD e SSD).
 
-### 5. 📦 Preservação de Projetos ao Remover Drives
-- Remover um drive mantém todos os projetos existentes intactos no catálogo (identificados como desvinculados até que sejam alocados a um novo drive).
-- Excluir um projeto na tabela de projetos o remove instantaneamente de todos os drives.
+### 5. 📦 Semântica Segura de Remoção de Projetos
+- Na **Visão em Drives**: use o botão *"Remover do Drive"* para desvincular um projeto de um disco específico sem apagá-lo do catálogo.
+- Na **Lista de Projetos**: use o botão *"✕ Excluir"* para exclusão permanente do projeto do sistema e de todos os discos.
 
-### 6. 💾 Compatibilidade de Formatos
-- Suporte a tags de sistema de arquivos: **exFAT** (universal Mac/Win), **APFS** (Apple nativo), **HFS+** e **NTFS** (Windows).
+### 6. 💾 Formatação & Tipos de Mídia Padronizados
+- Tipos de mídia estritamente **SSD** e **HD**.
+- Suporte a formatos de disco: **exFAT**, **APFS**, **HFS+** e **NTFS**.
 
 ### 7. ☁️ Sincronização em Tempo Real (Firebase Gratuito) + Modo Local
 - Funciona **100% offline / local** imediatamente sem precisar configurar nada (usando LocalStorage).

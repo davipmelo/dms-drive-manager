@@ -65,8 +65,8 @@ export function openDriveModal(driveToEdit = null) {
   document.getElementById('drive-modal-title').textContent = isEdit ? 'Editar Drive' : 'Cadastrar Novo Drive';
   document.getElementById('drive-id-input').value = isEdit ? driveToEdit.id : '';
   document.getElementById('drive-name-input').value = isEdit ? driveToEdit.name : '';
-  document.getElementById('drive-type-select').value = isEdit ? (driveToEdit.type === 'ssd' ? 'ssd' : 'hd') : 'hd';
-  document.getElementById('drive-fs-select').value = isEdit ? driveToEdit.fileSystem : 'exfat';
+  document.getElementById('drive-type-select').value = isEdit ? (String(driveToEdit.type).toUpperCase() === 'SSD' ? 'SSD' : 'HD') : 'HD';
+  document.getElementById('drive-fs-select').value = isEdit ? driveToEdit.fileSystem : 'exFAT';
   
   // Capacity: support GB/TB conversion
   const capGB = isEdit ? driveToEdit.totalCapacityGB : 2000;
@@ -78,13 +78,14 @@ export function openDriveModal(driveToEdit = null) {
     document.getElementById('drive-capacity-unit').value = 'GB';
   }
 
-  document.getElementById('drive-color-input').value = isEdit ? driveToEdit.color : '#06b6d4';
+  const driveColor = isEdit ? driveToEdit.color : '#ffbb00';
+  document.getElementById('drive-color-input').value = driveColor;
   document.getElementById('drive-notes-input').value = isEdit ? (driveToEdit.notes || '') : '';
 
   // Setup color swatch active states
   const swatches = document.querySelectorAll('#drive-modal .color-swatch-btn');
   swatches.forEach(btn => {
-    btn.classList.toggle('selected', btn.dataset.color === (isEdit ? driveToEdit.color : '#06b6d4'));
+    btn.classList.toggle('selected', btn.dataset.color.toLowerCase() === driveColor.toLowerCase());
   });
 
   // Delete button only on edit
@@ -100,14 +101,14 @@ export function handleDriveFormSubmit(e) {
   e.preventDefault();
   const id = document.getElementById('drive-id-input').value;
   const name = document.getElementById('drive-name-input').value.trim();
-  const type = document.getElementById('drive-type-select').value === 'ssd' ? 'ssd' : 'hd';
+  const type = document.getElementById('drive-type-select').value === 'SSD' ? 'SSD' : 'HD';
   const fileSystem = document.getElementById('drive-fs-select').value;
   
   const capVal = parseFloat(document.getElementById('drive-capacity-val').value) || 2;
   const capUnit = document.getElementById('drive-capacity-unit').value;
   const totalCapacityGB = capUnit === 'TB' ? capVal * 1000 : capVal;
 
-  const color = document.getElementById('drive-color-input').value;
+  const color = document.getElementById('drive-color-input').value || '#ffbb00';
   const notes = document.getElementById('drive-notes-input').value.trim();
 
   if (!name) {
@@ -184,22 +185,24 @@ export function openProjectModal(projectToEdit = null, preselectedDriveId = null
       label.style.borderRadius = 'var(--radius-sm)';
       label.style.cursor = 'pointer';
       label.style.border = '1px solid var(--border-subtle)';
+      label.style.color = '#ffffff';
 
       label.innerHTML = `
         <input type="checkbox" name="project-drive" value="${drive.id}" ${isChecked ? 'checked' : ''} />
-        <span style="width: 8px; height: 8px; border-radius: 50%; background: ${drive.color};"></span>
-        <span style="font-weight: 500; font-size: 13px;">${drive.name}</span>
-        <span style="color: var(--text-muted); font-size: 11px; margin-left: auto;">${drive.type.toUpperCase()} • ${state.constructor.formatGB(drive.totalCapacityGB)}</span>
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: ${drive.color}; flex-shrink: 0;"></span>
+        <span style="font-weight: 500; font-size: 13px; color: #ffffff;">${drive.name}</span>
+        <span style="color: #c0c0cb; font-size: 11px; margin-left: auto;">${String(drive.type).toUpperCase()} • ${state.constructor.formatGB(drive.totalCapacityGB)}</span>
       `;
 
       driveCheckboxesContainer.appendChild(label);
     });
   }
 
-  // Delete button
+  // Delete button: only allowed when editing on the "Lista de Projetos" table view!
   const deleteBtn = document.getElementById('project-delete-btn');
   if (deleteBtn) {
-    deleteBtn.style.display = isEdit ? 'inline-flex' : 'none';
+    const canPermanentlyDelete = isEdit && state.activeView === 'table';
+    deleteBtn.style.display = canPermanentlyDelete ? 'inline-flex' : 'none';
   }
 
   openDialog('project-modal');
@@ -262,7 +265,7 @@ export function openMoveProjectModal(project, sourceDrive = null, targetDrive = 
     if (drive.id !== (sourceDrive ? sourceDrive.id : null)) {
       const option = document.createElement('option');
       option.value = drive.id;
-      option.textContent = `${drive.name} (${drive.type.toUpperCase()}) - ${state.calculateDriveUsage(drive.id).freeGB} GB livres`;
+      option.textContent = `${drive.name} • ${String(drive.type).toUpperCase()} • ${state.calculateDriveUsage(drive.id).freeGB} GB livres`;
       if (targetDrive && drive.id === targetDrive.id) {
         option.selected = true;
       }

@@ -122,8 +122,33 @@
             </div>
 
             <div class="workbench-header-actions">
+              <!-- Grid / List View Toggle -->
+              <div class="view-mode-toggle">
+                <button type="button" id="btn-view-grid" class="view-mode-btn active" title="Visualização em Grade">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                  </svg>
+                  <span>Grade</span>
+                </button>
+                <button type="button" id="btn-view-list" class="view-mode-btn" title="Visualização em Lista">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                  </svg>
+                  <span>Lista</span>
+                </button>
+              </div>
+
+              <!-- Filter Button & Popover -->
               <div class="filters-dropdown-wrapper">
-                <button id="btn-toggle-filters-menu" class="btn btn-secondary btn-sm" aria-expanded="false" title="Filtrar por Segurança, Tipo de Mídia ou Cliente">
+                <button type="button" id="btn-toggle-filters-menu" class="btn btn-secondary btn-sm" aria-expanded="false" title="Filtrar Workbench">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
                   </svg>
@@ -211,18 +236,18 @@
             <div class="form-group">
               <label class="form-label" for="drive-type-select">Tipo de Mídia *</label>
               <select id="drive-type-select" class="form-select">
-                <option value="hd">🗄️ HD (Hard Disk / Armazenamento)</option>
-                <option value="ssd">⚡ SSD (Solid State / Alta Velocidade)</option>
+                <option value="SSD">SSD</option>
+                <option value="HD">HD</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="drive-fs-select">Sistema de Arquivos *</label>
+              <label class="form-label" for="drive-fs-select">Formatação *</label>
               <select id="drive-fs-select" class="form-select">
-                <option value="exfat">exFAT (Compatível Mac e Windows)</option>
-                <option value="apfs">APFS (Apple Mac Nativo)</option>
-                <option value="hfs">Mac OS Extended (HFS+)</option>
-                <option value="ntfs">NTFS (Windows Nativo)</option>
+                <option value="exFAT">exFAT</option>
+                <option value="APFS">APFS</option>
+                <option value="HFS+">HFS+</option>
+                <option value="NTFS">NTFS</option>
               </select>
             </div>
           </div>
@@ -240,14 +265,14 @@
 
           <div class="form-group">
             <label class="form-label">Cor da Etiqueta Visual</label>
-            <input type="hidden" id="drive-color-input" value="#06b6d4" />
+            <input type="hidden" id="drive-color-input" value="#ffbb00" />
             <div class="color-swatches">
-              <button type="button" class="color-swatch-btn selected" data-color="#06b6d4" style="background:#06b6d4;" title="Ciano"></button>
+              <button type="button" class="color-swatch-btn selected" data-color="#ffbb00" style="background:#ffbb00;" title="Amarelo"></button>
+              <button type="button" class="color-swatch-btn" data-color="#f59e0b" style="background:#f59e0b;" title="Âmbar"></button>
               <button type="button" class="color-swatch-btn" data-color="#3b82f6" style="background:#3b82f6;" title="Azul"></button>
               <button type="button" class="color-swatch-btn" data-color="#8b5cf6" style="background:#8b5cf6;" title="Roxo"></button>
               <button type="button" class="color-swatch-btn" data-color="#10b981" style="background:#10b981;" title="Esmeralda"></button>
-              <button type="button" class="color-swatch-btn" data-color="#f59e0b" style="background:#f59e0b;" title="Âmbar"></button>
-              <button type="button" class="color-swatch-btn" data-color="#f97316" style="background:#f97316;" title="Laranja"></button>
+              <button type="button" class="color-swatch-btn" data-color="#06b6d4" style="background:#06b6d4;" title="Ciano"></button>
               <button type="button" class="color-swatch-btn" data-color="#ef4444" style="background:#ef4444;" title="Vermelho"></button>
             </div>
           </div>

@@ -18,7 +18,7 @@ export function initDragAndDrop() {
 }
 
 function handleDragStart(e) {
-  const card = e.target.closest('.project-card');
+  const card = e.target.closest('.project-card, .project-list-row');
   if (!card) return;
 
   draggedProjectId = card.dataset.projectId;
@@ -35,13 +35,13 @@ function handleDragStart(e) {
 }
 
 function handleDragEnd(e) {
-  const card = e.target.closest('.project-card');
+  const card = e.target.closest('.project-card, .project-list-row');
   if (card) {
     card.classList.remove('is-dragging');
   }
 
   // Clear all drag target hover indicators
-  document.querySelectorAll('.drive-card.drag-target-over').forEach(el => {
+  document.querySelectorAll('.drive-card.drag-target-over, .drive-list-card.drag-target-over').forEach(el => {
     el.classList.remove('drag-target-over');
   });
 
@@ -50,7 +50,7 @@ function handleDragEnd(e) {
 }
 
 function handleDragOver(e) {
-  const driveCard = e.target.closest('.drive-card');
+  const driveCard = e.target.closest('.drive-card, .drive-list-card');
   if (!driveCard) return;
 
   const targetDriveId = driveCard.dataset.driveId;
@@ -65,7 +65,7 @@ function handleDragOver(e) {
 }
 
 function handleDragLeave(e) {
-  const driveCard = e.target.closest('.drive-card');
+  const driveCard = e.target.closest('.drive-card, .drive-list-card');
   if (!driveCard) return;
 
   // Ensure we didn't just hover over a child element inside the drive card
@@ -81,7 +81,7 @@ function handleDragLeave(e) {
 }
 
 function handleDrop(e) {
-  const driveCard = e.target.closest('.drive-card');
+  const driveCard = e.target.closest('.drive-card, .drive-list-card');
   if (!driveCard) return;
 
   e.preventDefault();

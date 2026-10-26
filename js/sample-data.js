@@ -7,17 +7,17 @@ export const INITIAL_DRIVES = [
   {
     id: "drive-1",
     name: "SSD SanDisk Extreme Pro 4TB",
-    type: "ssd", // hd, ssd
-    fileSystem: "exfat",
+    type: "SSD", // HD, SSD
+    fileSystem: "exFAT",
     totalCapacityGB: 4000,
-    color: "#06b6d4", // Cyan
+    color: "#ffbb00", // Yellow base
     notes: "SSD principal de edição de diárias 4K/6K em ProRes"
   },
   {
     id: "drive-2",
     name: "SSD Samsung T7 Shield 2TB",
-    type: "ssd",
-    fileSystem: "apfs",
+    type: "SSD",
+    fileSystem: "APFS",
     totalCapacityGB: 2000,
     color: "#f59e0b", // Amber
     notes: "Utilizado para descarrego direto das câmeras no set"
@@ -25,8 +25,8 @@ export const INITIAL_DRIVES = [
   {
     id: "drive-3",
     name: "HD G-Drive Enterprise 18TB Desktop",
-    type: "hd",
-    fileSystem: "exfat",
+    type: "HD",
+    fileSystem: "exFAT",
     totalCapacityGB: 18000,
     color: "#8b5cf6", // Purple
     notes: "Drive de arquivo bruto e backup primário do estúdio"
@@ -34,8 +34,8 @@ export const INITIAL_DRIVES = [
   {
     id: "drive-4",
     name: "SSD LaCie Rugged Pro 2TB (Laranja)",
-    type: "ssd",
-    fileSystem: "exfat",
+    type: "SSD",
+    fileSystem: "exFAT",
     totalCapacityGB: 2000,
     color: "#f97316", // Orange
     notes: "Em trânsito para gravações e grading no DaVinci"
@@ -43,8 +43,8 @@ export const INITIAL_DRIVES = [
   {
     id: "drive-5",
     name: "HD Storage Central 32TB",
-    type: "hd",
-    fileSystem: "apfs",
+    type: "HD",
+    fileSystem: "APFS",
     totalCapacityGB: 32000,
     color: "#10b981", // Emerald
     notes: "Storage central conectado à rede de alta velocidade"

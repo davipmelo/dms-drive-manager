@@ -46,13 +46,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 6. Setup Workbench Filters Dropdown Popover
   setupFiltersDropdown();
 
-  // 7. Setup Keyboard Shortcuts
+  // 7. Setup Workbench View Mode Toggle (Grid / List)
+  setupWorkbenchViewToggle();
+
+  // 8. Setup Keyboard Shortcuts
   setupKeyboardShortcuts();
 
-  // 8. Initialize Cloud Service (or fallback to local offline mode)
+  // 9. Initialize Cloud Service (or fallback to local offline mode)
   await firebaseService.init();
 
-  // 9. Initial Render
+  // 10. Initial Render
   renderApp();
 });
 
@@ -113,6 +116,24 @@ function setupFiltersDropdown() {
       toggleBtn.setAttribute('aria-expanded', 'false');
     }
   });
+}
+
+// Setup Grid / List View Toggle in Workbench
+function setupWorkbenchViewToggle() {
+  const btnGrid = document.getElementById('btn-view-grid');
+  const btnList = document.getElementById('btn-view-list');
+
+  if (btnGrid) {
+    btnGrid.addEventListener('click', () => {
+      state.setWorkbenchLayout('grid');
+    });
+  }
+
+  if (btnList) {
+    btnList.addEventListener('click', () => {
+      state.setWorkbenchLayout('list');
+    });
+  }
 }
 
 // Setup Search & Header Buttons

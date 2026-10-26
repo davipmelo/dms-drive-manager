@@ -20,14 +20,15 @@
 }
 
 .btn-primary {
-  background: var(--gradient-accent);
-  color: #ffffff;
-  box-shadow: 0 2px 10px rgba(56, 189, 248, 0.25);
+  background: #ffbb00;
+  color: #08080a;
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(255, 187, 0, 0.3);
 }
 
 .btn-primary:hover {
-  filter: brightness(1.1);
-  box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
+  background: #ffd033;
+  box-shadow: 0 4px 15px rgba(255, 187, 0, 0.45);
   transform: translateY(-1px);
 }
 
@@ -57,6 +58,26 @@
   border-color: var(--accent-rose);
 }
 
+.btn-remove-from-drive {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #fb7185;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-remove-from-drive:hover {
+  background-color: rgba(239, 68, 68, 0.22);
+  border-color: var(--accent-rose);
+  color: #fff;
+}
+
 .btn-icon {
   width: 34px;
   height: 34px;
@@ -84,30 +105,39 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 3px 8px;
+  padding: 2px 7px;
   border-radius: var(--radius-full);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.2;
 }
 
 .pill-hd {
-  background: rgba(148, 163, 184, 0.15);
-  color: #cbd5e1;
-  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e4e4e7;
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .pill-ssd {
-  background: rgba(6, 182, 212, 0.15);
-  color: var(--accent-cyan);
-  border: 1px solid rgba(6, 182, 212, 0.35);
+  background: rgba(255, 187, 0, 0.15);
+  color: #ffbb00;
+  border: 1px solid rgba(255, 187, 0, 0.35);
 }
 
 .pill-unassigned {
-  background: rgba(245, 158, 11, 0.15);
-  color: #f59e0b;
-  border: 1px solid rgba(245, 158, 11, 0.35);
+  background: rgba(255, 187, 0, 0.15);
+  color: #ffbb00;
+  border: 1px solid rgba(255, 187, 0, 0.35);
   font-weight: 600;
+}
+
+/* Project Dialog Drives Checkboxes: Ensure Pure White Text */
+.drive-checkbox-item {
+  color: #ffffff !important;
+}
+
+.drive-checkbox-item span {
+  color: #ffffff !important;
 }
 
 /* File System Pills */

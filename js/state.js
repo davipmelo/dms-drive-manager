@@ -16,22 +16,31 @@ class StateStore {
   constructor() {
     this.listeners = new Set();
     this.isCloudConnected = false;
-    this.activeView = 'drives'; // 'drives' | 'table' | 'analytics'
+    this.activeView = 'drives'; // 'drives' | 'table'
+    this.workbenchLayout = this.loadFromLocalStorage('dms_workbench_layout_v1', 'grid'); // 'grid' | 'list'
     
     // Load local cache or fallback to initial video sample data
     const loadedDrives = this.loadFromLocalStorage(STORAGE_KEYS.DRIVES, INITIAL_DRIVES);
-    // Sanitize drive types: only 'hd' and 'ssd', remove obsolete properties
+    // Sanitize drive types: literally only 'HD' and 'SSD'
     this.drives = loadedDrives.map(d => {
-      let cleanType = 'hd';
-      if (d.type === 'ssd' || d.type === 'nvme') cleanType = 'ssd';
-      else cleanType = 'hd';
+      let cleanType = 'HD';
+      const rawType = String(d.type || '').toUpperCase();
+      if (rawType === 'SSD' || rawType === 'NVME') cleanType = 'SSD';
+      else cleanType = 'HD';
+
+      let fs = d.fileSystem || 'exFAT';
+      if (fs.toLowerCase() === 'exfat') fs = 'exFAT';
+      else if (fs.toLowerCase() === 'apfs') fs = 'APFS';
+      else if (fs.toLowerCase() === 'hfs' || fs.toLowerCase() === 'hfs+') fs = 'HFS+';
+      else if (fs.toLowerCase() === 'ntfs') fs = 'NTFS';
+
       return {
         id: d.id,
         name: d.name,
         type: cleanType,
-        fileSystem: d.fileSystem || 'exfat',
+        fileSystem: fs,
         totalCapacityGB: Number(d.totalCapacityGB) || 2000,
-        color: d.color || '#06b6d4',
+        color: d.color || '#ffbb00',
         notes: d.notes || ''
       };
     });
@@ -53,7 +62,7 @@ class StateStore {
     this.filters = {
       searchQuery: '',
       client: 'all',
-      driveType: 'all', // 'all' | 'hd' | 'ssd'
+      driveType: 'all', // 'all' | 'HD' | 'SSD'
       redundancy: 'all', // 'all' | 'single' | 'safe'
       tag: 'all'
     };
@@ -99,6 +108,14 @@ class StateStore {
     this.notify();
   }
 
+  setWorkbenchLayout(layout) {
+    this.workbenchLayout = layout === 'list' ? 'list' : 'grid';
+    try {
+      localStorage.setItem('dms_workbench_layout_v1', JSON.stringify(this.workbenchLayout));
+    } catch(e) {}
+    this.notify();
+  }
+
   // Filter Updates
   setSearchQuery(query) {
     this.filters.searchQuery = query.trim().toLowerCase();
@@ -123,14 +140,22 @@ class StateStore {
 
   // Drive CRUD
   addDrive(driveData) {
-    const cleanType = driveData.type === 'ssd' ? 'ssd' : 'hd';
+    const rawType = String(driveData.type || '').toUpperCase();
+    const cleanType = (rawType === 'SSD' || rawType === 'NVME') ? 'SSD' : 'HD';
+
+    let fs = driveData.fileSystem || 'exFAT';
+    if (fs.toLowerCase() === 'exfat') fs = 'exFAT';
+    else if (fs.toLowerCase() === 'apfs') fs = 'APFS';
+    else if (fs.toLowerCase() === 'hfs' || fs.toLowerCase() === 'hfs+') fs = 'HFS+';
+    else if (fs.toLowerCase() === 'ntfs') fs = 'NTFS';
+
     const newDrive = {
       id: `drive-${Date.now()}`,
       name: driveData.name.trim(),
       type: cleanType,
-      fileSystem: driveData.fileSystem || 'exfat',
+      fileSystem: fs,
       totalCapacityGB: Number(driveData.totalCapacityGB) || 2000,
-      color: driveData.color || '#06b6d4',
+      color: driveData.color || '#ffbb00',
       notes: driveData.notes ? driveData.notes.trim() : ''
     };
 
@@ -144,7 +169,16 @@ class StateStore {
     if (index !== -1) {
       const sanitizedUpdates = { ...updates };
       if (sanitizedUpdates.type) {
-        sanitizedUpdates.type = (sanitizedUpdates.type === 'ssd' || sanitizedUpdates.type === 'nvme') ? 'ssd' : 'hd';
+        const rawType = String(sanitizedUpdates.type).toUpperCase();
+        sanitizedUpdates.type = (rawType === 'SSD' || rawType === 'NVME') ? 'SSD' : 'HD';
+      }
+      if (sanitizedUpdates.fileSystem) {
+        let fs = sanitizedUpdates.fileSystem;
+        if (fs.toLowerCase() === 'exfat') fs = 'exFAT';
+        else if (fs.toLowerCase() === 'apfs') fs = 'APFS';
+        else if (fs.toLowerCase() === 'hfs' || fs.toLowerCase() === 'hfs+') fs = 'HFS+';
+        else if (fs.toLowerCase() === 'ntfs') fs = 'NTFS';
+        sanitizedUpdates.fileSystem = fs;
       }
       delete sanitizedUpdates.serial;
       delete sanitizedUpdates.custody;
@@ -273,7 +307,7 @@ class StateStore {
 
     for (const drive of this.drives) {
       totalStorageGB += (drive.totalCapacityGB || 0);
-      if (drive.type === 'ssd') ssdCount++;
+      if (String(drive.type).toUpperCase() === 'SSD') ssdCount++;
       else hdCount++;
     }
 
@@ -351,11 +385,12 @@ class StateStore {
         return false;
       }
 
-      // Filter by Drive Type (hd or ssd)
+      // Filter by Drive Type (HD or SSD)
       if (this.filters.driveType !== 'all') {
+        const targetType = this.filters.driveType.toUpperCase();
         const driveMatches = (p.drives || []).some(driveId => {
           const drive = this.drives.find(d => d.id === driveId);
-          return drive && drive.type === this.filters.driveType;
+          return drive && String(drive.type).toUpperCase() === targetType;
         });
         if (!driveMatches) return false;
       }
