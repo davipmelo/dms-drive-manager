@@ -94,6 +94,13 @@ function renderSidebarStorage() {
 
           <div class="gauge-stats-column">
             <div class="gauge-stat-item">
+              <span class="stat-dot" style="background: var(--text-muted);"></span>
+              <div>
+                <div class="gauge-stat-label">Espaço Total</div>
+                <div class="gauge-stat-val">${state.constructor.formatGB(stats.totalStorageGB)}</div>
+              </div>
+            </div>
+            <div class="gauge-stat-item">
               <span class="stat-dot" style="background: var(--accent-yellow, #ffbb00);"></span>
               <div>
                 <div class="gauge-stat-label">Espaço Usado</div>
@@ -101,17 +108,10 @@ function renderSidebarStorage() {
               </div>
             </div>
             <div class="gauge-stat-item">
-              <span class="stat-dot" style="background: var(--accent-emerald);"></span>
+              <span class="stat-dot" style="background: var(--text-secondary);"></span>
               <div>
                 <div class="gauge-stat-label">Espaço Livre</div>
                 <div class="gauge-stat-val">${state.constructor.formatGB(stats.totalFreeGB)}</div>
-              </div>
-            </div>
-            <div class="gauge-stat-item">
-              <span class="stat-dot" style="background: var(--text-muted);"></span>
-              <div>
-                <div class="gauge-stat-label">Capacidade Total</div>
-                <div class="gauge-stat-val">${state.constructor.formatGB(stats.totalStorageGB)}</div>
               </div>
             </div>
           </div>
@@ -121,34 +121,30 @@ function renderSidebarStorage() {
       <!-- Quick Metrics Grid -->
       <div class="sidebar-metrics-grid">
         <div class="metric-pill-card">
-          <div class="metric-icon">💾</div>
           <div class="metric-info">
-            <span class="metric-label">Mídias Físicas</span>
+            <span class="metric-label">DRIVES</span>
             <span class="metric-val">${stats.totalDrives}</span>
             <span class="metric-sub">${stats.hdCount} HD • ${stats.ssdCount} SSD</span>
           </div>
         </div>
 
         <div class="metric-pill-card">
-          <div class="metric-icon">📁</div>
           <div class="metric-info">
-            <span class="metric-label">Projetos Totais</span>
+            <span class="metric-label">PROJETOS</span>
             <span class="metric-val">${stats.totalProjects}</span>
-            <span class="metric-sub">${stats.unassignedProjectsCount > 0 ? `<span style="color:var(--accent-amber); font-weight:700;">${stats.unassignedProjectsCount} sem drive</span>` : 'Todos vinculados'}</span>
+            <span class="metric-sub">${stats.unassignedProjectsCount > 0 ? `<span style="color:var(--accent-yellow); font-weight:700;">${stats.unassignedProjectsCount} sem drive</span>` : 'Todos vinculados'}</span>
           </div>
         </div>
 
         <div class="metric-pill-card" style="grid-column: 1 / -1;">
-          <div class="metric-icon">${stats.safeBackupPct < 60 ? '⚠️' : '🛡️'}</div>
           <div class="metric-info" style="flex:1;">
             <div style="display:flex; justify-content:space-between; align-items:baseline;">
-              <span class="metric-label">Saúde de Backup</span>
-              <span class="metric-val" style="font-size:15px; color:${stats.safeBackupPct < 60 ? 'var(--accent-rose)' : 'var(--accent-emerald)'}">${stats.safeBackupPct}%</span>
+              <span class="metric-label">PROJETOS EM RISCO</span>
+              <span class="metric-val" style="font-size:16px; font-weight:800; color:${stats.atRiskCount > 0 ? '#ffbb00' : 'var(--text-secondary)'};">${stats.atRiskCount}</span>
             </div>
-            <div class="sidebar-mini-bar-track">
-              <div class="sidebar-mini-bar-fill" style="width:${stats.safeBackupPct}%; background:${stats.safeBackupPct < 60 ? 'var(--accent-rose)' : 'var(--accent-emerald)'};"></div>
-            </div>
-            <span class="metric-sub">${stats.safeBackupCount} protegidos (2+ cópias) • ${stats.singleCopyCount} em risco</span>
+            <span class="metric-sub" style="margin-top: 4px;">
+              ${stats.atRiskCount === 0 ? 'Nenhum projeto em risco' : `${stats.atRiskCount} ${stats.atRiskCount === 1 ? 'projeto com cópia única' : 'projetos com cópia única'} (não arquivados)`}
+            </span>
           </div>
         </div>
       </div>
@@ -369,28 +365,62 @@ function renderDrivesWorkbench() {
     }
   }
 
-  // Filter drives if driveType filter is active
+  // Filter drives: if search or project filters are active, only show drives that match or have matching projects
+  const searchQuery = (state.filters.searchQuery || '').trim().toLowerCase();
+  const isSearchActive = searchQuery.length > 0;
+
   const visibleDrives = state.drives.filter(drive => {
+    // 1. Drive type filter
     if (state.filters.driveType !== 'all') {
       if (String(drive.type).toUpperCase() !== String(state.filters.driveType).toUpperCase()) return false;
     }
+
+    // Projects belonging to this drive that match active filters
+    const driveProjects = state.projects.filter(p => (p.drives || []).includes(drive.id));
+    const matchingProjects = driveProjects.filter(p => filteredProjectIds.has(p.id));
+
+    // If searching, hide drives without matching projects unless the drive itself matches the search
+    if (isSearchActive) {
+      const driveMatch = drive.name.toLowerCase().includes(searchQuery) ||
+                         (drive.notes && drive.notes.toLowerCase().includes(searchQuery));
+      if (!driveMatch && matchingProjects.length === 0) {
+        return false;
+      }
+    } else {
+      // If other project filters (client, redundancy, tag) are active, only show drives with matching projects
+      const otherFiltersActive = state.filters.client !== 'all' || 
+                                 state.filters.redundancy !== 'all' || 
+                                 state.filters.tag !== 'all';
+      if (otherFiltersActive && matchingProjects.length === 0) {
+        return false;
+      }
+    }
+
     return true;
   });
 
   if (visibleDrives.length === 0) {
-    container.className = 'drives-grid';
+    container.className = state.workbenchLayout === 'list' ? 'drives-list-container' : 'drives-grid';
     container.innerHTML = `
       <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-muted);">
-        <p style="font-size: 16px; margin-bottom: 12px;">Nenhum drive encontrado com os filtros selecionados.</p>
+        <p style="font-size: 15px; margin-bottom: 12px; color: var(--text-secondary);">
+          ${isSearchActive ? `Nenhum drive ou projeto encontrado para "${state.filters.searchQuery}".` : 'Nenhum drive encontrado com os filtros selecionados.'}
+        </p>
         <button class="btn btn-secondary btn-sm" id="btn-reset-filters">Limpar Filtros</button>
       </div>
     `;
     const resetBtn = document.getElementById('btn-reset-filters');
-    if (resetBtn) resetBtn.addEventListener('click', () => state.resetFilters());
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        state.resetFilters();
+        const searchInput = document.getElementById('global-search-input');
+        if (searchInput) searchInput.value = '';
+      });
+    }
     return;
   }
 
-  // Render according to layout mode: 'list' or 'grid'
+  // Render according to layout mode: 'list' (Table / Master-Detail) or 'grid' (Cards)
   if (state.workbenchLayout === 'list') {
     container.className = 'drives-list-container';
     container.innerHTML = visibleDrives.map(drive => {
@@ -409,47 +439,110 @@ function renderDrivesWorkbench() {
 
       return `
         <div class="drive-list-card" data-drive-id="${drive.id}" style="--drive-color: ${drive.color || '#ffbb00'};">
-          <div class="drive-list-header">
-            <div class="drive-list-left">
+          <!-- Master Drive Header -->
+          <div class="drive-list-card-header">
+            <div class="drive-list-info-block">
               <span class="drive-list-color-dot" style="background: ${drive.color || '#ffbb00'};"></span>
-              <span class="drive-list-name" title="${drive.name}">${drive.name}</span>
-              <div class="drive-list-pills">
-                <span class="pill ${typeClass}">${typeLabel}</span>
-                <span class="pill ${fsClass}">${fsLabel}</span>
+              <div class="drive-list-title-group">
+                <div class="drive-list-title-row">
+                  <span class="drive-list-name" title="${drive.name}">${drive.name}</span>
+                  <span class="pill ${typeClass}">${typeLabel}</span>
+                  <span class="pill ${fsClass}">${fsLabel}</span>
+                </div>
+                ${drive.notes ? `<span class="drive-list-notes" title="${drive.notes}">${drive.notes}</span>` : ''}
               </div>
             </div>
 
-            <div class="drive-list-center">
-              <div class="drive-list-cap-meta">
-                <span><strong>${state.constructor.formatGB(usage.usedGB)}</strong> usados de ${state.constructor.formatGB(usage.totalGB)}</span>
+            <!-- Usage Meter Bar & Stats -->
+            <div class="drive-list-meter-block">
+              <div class="drive-list-meter-header">
+                <span><strong>${state.constructor.formatGB(usage.usedGB)}</strong> usados de <strong>${state.constructor.formatGB(usage.totalGB)}</strong></span>
                 <span><strong>${usage.pct}%</strong> (${state.constructor.formatGB(usage.freeGB)} livres)</span>
               </div>
-              <div class="drive-list-bar-track">
-                <div class="drive-list-bar-fill ${barClass}" style="width: ${usage.pct}%;"></div>
+              <div class="drive-list-meter-track">
+                <div class="drive-list-meter-fill ${barClass}" style="width: ${usage.pct}%;"></div>
               </div>
             </div>
 
-            <div class="drive-list-right">
-              <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">
-                ${matchingProjects.length} ${matchingProjects.length === 1 ? 'projeto' : 'projetos'}
+            <!-- Actions & Count -->
+            <div class="drive-list-actions-block">
+              <span class="drive-list-badge-count">
+                ${matchingProjects.length} ${matchingProjects.length === 1 ? 'PROJETO' : 'PROJETOS'}
               </span>
               <button class="btn btn-secondary btn-sm btn-add-project-to-drive" data-drive-id="${drive.id}" title="Adicionar Projeto Neste Drive">
-                + Projeto
+                + PROJETO
               </button>
               <button class="btn btn-secondary btn-sm btn-drive-edit" data-drive-id="${drive.id}" title="Editar Drive">
-                Editar
+                EDITAR
               </button>
             </div>
           </div>
 
-          <div class="drive-list-body" data-drive-id="${drive.id}">
+          <!-- Subprojects Embedded Table -->
+          <div class="drive-subprojects-container" data-drive-id="${drive.id}">
             ${matchingProjects.length > 0 ? `
-              <div class="drive-list-projects-wrapper">
-                ${matchingProjects.map(project => renderProjectListRow(project, drive.id)).join('')}
-              </div>
+              <table class="drive-subprojects-table">
+                <thead>
+                  <tr>
+                    <th style="width: 32%;">PROJETO</th>
+                    <th style="width: 18%;">CLIENTE</th>
+                    <th style="width: 12%;">TAMANHO</th>
+                    <th style="width: 14%;">SEGURANÇA</th>
+                    <th style="width: 24%; text-align: right;">AÇÕES</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${matchingProjects.map(project => {
+                    const copies = (project.drives || []).length;
+                    let backupPill = '';
+                    if (copies === 0) {
+                      backupPill = `<span class="pill pill-unassigned">Sem Drive</span>`;
+                    } else if (copies >= 2) {
+                      backupPill = `<span class="pill pill-backup-safe">${copies} Cópias</span>`;
+                    } else {
+                      backupPill = `<span class="pill pill-backup-danger">Cópia Única</span>`;
+                    }
+
+                    return `
+                      <tr class="subproject-table-row" draggable="true" data-project-id="${project.id}" data-drive-id="${drive.id}">
+                        <td>
+                          <div class="subproject-name-cell">
+                            <span class="subproject-name" title="${project.name}">${project.name}</span>
+                            <div class="subproject-tags" style="display:flex; gap:4px; margin-top:2px; flex-wrap:wrap;">
+                              ${project.tags.map(t => `<span class="project-tag">${t}</span>`).join('')}
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span class="subproject-client">${project.client}</span>
+                        </td>
+                        <td>
+                          <span class="subproject-size-badge">${state.constructor.formatGB(project.sizeGB)}</span>
+                        </td>
+                        <td>
+                          ${backupPill}
+                        </td>
+                        <td>
+                          <div class="subproject-actions-cell">
+                            <button class="btn btn-remove-from-drive" data-project-id="${project.id}" data-drive-id="${drive.id}" title="Desvincular este projeto deste drive">
+                              REMOVER
+                            </button>
+                            <button class="btn btn-secondary btn-sm btn-project-move" data-project-id="${project.id}" data-drive-id="${drive.id}" title="Copiar ou mover para outro drive">
+                              COPIAR OU MOVER
+                            </button>
+                            <button class="btn btn-secondary btn-sm btn-project-edit" data-project-id="${project.id}" title="Editar Projeto">
+                              ✎
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
             ` : `
-              <div style="font-size: 12px; color: var(--text-muted); padding: 8px 4px; text-align: center;">
-                Nenhum projeto alocado neste drive. Arraste um projeto aqui para vincular.
+              <div class="drive-list-empty-state">
+                Nenhum projeto alocado neste drive. Arraste um projeto aqui para vincular ou clique em "+ PROJETO".
               </div>
             `}
           </div>
@@ -578,24 +671,28 @@ function renderProjectCard(project, currentDriveId) {
         ${backupPill}
       </div>
 
-      <div style="display:flex; justify-content:flex-end; gap:4px; margin-top:6px; flex-wrap:wrap;">
-        ${currentDriveId ? `
-          <button class="btn btn-secondary btn-sm btn-remove-from-drive" data-project-id="${project.id}" data-drive-id="${currentDriveId}" title="Remover este projeto deste drive" style="padding: 2px 7px; font-size: 11px; color: var(--accent-rose);">
-            Remover do Drive
+      <div class="project-card-actions-row">
+        <div class="actions-left">
+          ${currentDriveId ? `
+            <button class="btn btn-remove-from-drive" data-project-id="${project.id}" data-drive-id="${currentDriveId}" title="Desvincular este projeto deste drive">
+              REMOVER
+            </button>
+          ` : ''}
+        </div>
+        <div class="actions-right">
+          <button class="btn btn-secondary btn-sm btn-project-move" data-project-id="${project.id}" data-drive-id="${currentDriveId}">
+            ${currentDriveId ? 'COPIAR OU MOVER' : 'VINCULAR A DRIVE'}
           </button>
-        ` : ''}
-        <button class="btn btn-secondary btn-sm btn-project-move" data-project-id="${project.id}" data-drive-id="${currentDriveId}" style="padding: 2px 8px; font-size: 11px;">
-          ${currentDriveId ? 'Mover / Duplicar ➔' : 'Atribuir a Drive ➔'}
-        </button>
-        <button class="btn btn-secondary btn-sm btn-project-edit" data-project-id="${project.id}" style="padding: 2px 6px; font-size: 11px;" title="Editar Projeto">
-          ✎
-        </button>
+          <button class="btn btn-secondary btn-sm btn-project-edit" data-project-id="${project.id}" title="Editar Projeto">
+            ✎
+          </button>
+        </div>
       </div>
     </div>
   `;
 }
 
-// Render Project Row for List View
+// Render Project Row for List View (Fallback helper)
 function renderProjectListRow(project, currentDriveId) {
   const copies = (project.drives || []).length;
   let backupPill = '';
@@ -623,14 +720,14 @@ function renderProjectListRow(project, currentDriveId) {
 
       <div class="project-list-actions">
         ${currentDriveId ? `
-          <button class="btn btn-secondary btn-sm btn-remove-from-drive" data-project-id="${project.id}" data-drive-id="${currentDriveId}" title="Remover este projeto deste drive" style="padding: 3px 8px; font-size: 11px; color: var(--accent-rose);">
-            Remover do Drive
+          <button class="btn btn-remove-from-drive" data-project-id="${project.id}" data-drive-id="${currentDriveId}" title="Remover este projeto deste drive">
+            REMOVER
           </button>
         ` : ''}
-        <button class="btn btn-secondary btn-sm btn-project-move" data-project-id="${project.id}" data-drive-id="${currentDriveId}" style="padding: 3px 8px; font-size: 11px;" title="Mover ou Duplicar">
-          ${currentDriveId ? 'Mover / Duplicar ➔' : 'Atribuir a Drive ➔'}
+        <button class="btn btn-secondary btn-sm btn-project-move" data-project-id="${project.id}" data-drive-id="${currentDriveId}" title="Copiar ou mover para outro drive">
+          ${currentDriveId ? 'COPIAR OU MOVER' : 'VINCULAR A DRIVE'}
         </button>
-        <button class="btn btn-secondary btn-sm btn-project-edit" data-project-id="${project.id}" style="padding: 3px 6px; font-size: 11px;" title="Editar Projeto">
+        <button class="btn btn-secondary btn-sm btn-project-edit" data-project-id="${project.id}" title="Editar Projeto">
           ✎
         </button>
       </div>

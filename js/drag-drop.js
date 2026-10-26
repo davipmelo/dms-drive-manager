@@ -18,7 +18,7 @@ export function initDragAndDrop() {
 }
 
 function handleDragStart(e) {
-  const card = e.target.closest('.project-card, .project-list-row');
+  const card = e.target.closest('.project-card, .project-list-row, .subproject-table-row');
   if (!card) return;
 
   draggedProjectId = card.dataset.projectId;
@@ -35,7 +35,7 @@ function handleDragStart(e) {
 }
 
 function handleDragEnd(e) {
-  const card = e.target.closest('.project-card, .project-list-row');
+  const card = e.target.closest('.project-card, .project-list-row, .subproject-table-row');
   if (card) {
     card.classList.remove('is-dragging');
   }

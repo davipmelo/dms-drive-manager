@@ -693,9 +693,7 @@
   flex: 1;
   overflow-y: auto;
   padding: 24px;
-  background: radial-gradient(circle at 80% 10%, rgba(56, 189, 248, 0.03), transparent 60%),
-              radial-gradient(circle at 10% 90%, rgba(139, 92, 246, 0.03), transparent 60%),
-              var(--bg-app);
+  background-color: var(--bg-app);
 }
 
 .view-section {
@@ -727,25 +725,32 @@
 }
 
 .section-subtitle {
-/* View Mode Toggle (Grade / Lista) */
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* View Mode Toggle (Grade / Lista) - Clean Flat Theme */
 .view-mode-toggle {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   background-color: var(--bg-surface-elevated);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
-  padding: 2px;
-  gap: 2px;
+  padding: 3px;
+  gap: 3px;
 }
 
 .view-mode-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 10px;
-  font-size: 12px;
-  font-weight: 600;
-  border: none;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid transparent;
   background: transparent;
   color: var(--text-secondary);
   border-radius: 4px;
@@ -761,65 +766,104 @@
 .view-mode-btn.active {
   background-color: #ffbb00;
   color: #08080a;
-  font-weight: 700;
+  border-color: #ffbb00;
+  font-weight: 800;
+}
+
+/* Project Card Actions Row (Align REMOVER to the left, others to right) */
+.project-card-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.project-card-actions-row .actions-left {
+  display: flex;
+  align-items: center;
+}
+
+.project-card-actions-row .actions-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
 }
 
 /* ==========================================================================
-   DRIVES LIST VIEW LAYOUT (Visão em Lista Limpa e Intuitiva)
+   DRIVES LIST VIEW LAYOUT (Estrutura Master-Detail Limpa e Intuitiva)
    ========================================================================== */
 
 .drives-list-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .drive-list-card {
   background-color: var(--bg-surface-card);
   border: 1px solid var(--border-default);
-  border-left: 4px solid var(--drive-color, #ffbb00);
+  border-left: 5px solid var(--drive-color, #ffbb00);
   border-radius: var(--radius-md);
   overflow: hidden;
-  transition: all var(--transition-fast);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .drive-list-card:hover {
   border-color: var(--border-highlight);
-  box-shadow: var(--shadow-sm);
 }
 
 .drive-list-card.drag-target-over {
   border-color: #ffbb00;
-  box-shadow: 0 0 20px rgba(255, 187, 0, 0.3);
-  background-color: rgba(255, 187, 0, 0.03);
+  background-color: rgba(255, 187, 0, 0.02);
+  box-shadow: 0 0 0 1px #ffbb00;
 }
 
-.drive-list-header {
-  padding: 12px 16px;
+/* Header do Drive na Lista */
+.drive-list-card-header {
+  padding: 16px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 20px;
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
   flex-wrap: wrap;
 }
 
-.drive-list-left {
+.drive-list-info-block {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-width: 220px;
+  gap: 12px;
+  min-width: 240px;
   flex: 1;
 }
 
 .drive-list-color-dot {
-  width: 9px;
-  height: 9px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
+.drive-list-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.drive-list-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .drive-list-name {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text-primary);
   white-space: nowrap;
@@ -827,152 +871,167 @@
   text-overflow: ellipsis;
 }
 
-.drive-list-pills {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.drive-list-center {
-  flex: 1.5;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  min-width: 200px;
+.drive-list-notes {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   max-width: 380px;
 }
 
-.drive-list-cap-meta {
+/* Gráfico de Uso de Armazenamento Central */
+.drive-list-meter-block {
+  flex: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 240px;
+  max-width: 400px;
+}
+
+.drive-list-meter-header {
   display: flex;
   justify-content: space-between;
   font-size: 11px;
   color: var(--text-muted);
 }
 
-.drive-list-cap-meta strong {
+.drive-list-meter-header strong {
   color: var(--text-primary);
 }
 
-.drive-list-bar-track {
-  height: 6px;
+.drive-list-meter-track {
+  height: 7px;
   width: 100%;
   background-color: var(--bg-surface-elevated);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
 
-.drive-list-bar-fill {
+.drive-list-meter-fill {
   height: 100%;
-  background: var(--gradient-safe);
+  background: #ffbb00;
   border-radius: var(--radius-full);
-  transition: width 0.4s ease;
+  transition: width 0.3s ease;
 }
 
-.drive-list-bar-fill.warning {
-  background: var(--gradient-warning);
+.drive-list-meter-fill.warning {
+  background: #f59e0b;
 }
 
-.drive-list-bar-fill.critical {
-  background: var(--gradient-critical);
+.drive-list-meter-fill.critical {
+  background: #ef4444;
 }
 
-.drive-list-right {
+/* Ações e Contagem do Drive */
+.drive-list-actions-block {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.btn-toggle-drive-projects {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--bg-surface-elevated);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-secondary);
+.drive-list-badge-count {
   font-size: 11px;
-  font-weight: 600;
-  padding: 5px 10px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.btn-toggle-drive-projects:hover {
-  background-color: var(--bg-surface-hover);
-  color: var(--text-primary);
-}
-
-.drive-list-body {
-  border-top: 1px solid var(--border-subtle);
-  background-color: rgba(0, 0, 0, 0.2);
-  padding: 10px 14px;
-}
-
-.drive-list-projects-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.project-list-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 8px 12px;
+  font-weight: 700;
+  color: var(--text-muted);
   background-color: var(--bg-surface-elevated);
   border: 1px solid var(--border-subtle);
+  padding: 4px 10px;
   border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+/* Tabela de Subprojetos dentro do Drive */
+.drive-subprojects-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.drive-subprojects-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.drive-subprojects-table th {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  padding: 10px 16px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+}
+
+.drive-subprojects-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+  background-color: transparent;
+  transition: background-color var(--transition-fast);
+}
+
+.drive-subprojects-table tr:last-child td {
+  border-bottom: none;
+}
+
+.drive-subprojects-table tr.subproject-table-row {
   cursor: grab;
-  transition: all var(--transition-fast);
 }
 
-.project-list-row:hover {
+.drive-subprojects-table tr.subproject-table-row:hover td {
   background-color: var(--bg-surface-hover);
-  border-color: var(--border-highlight);
 }
 
-.project-list-row.is-dragging {
-  opacity: 0.4;
+.drive-subprojects-table tr.subproject-table-row.is-dragging {
+  opacity: 0.35;
 }
 
-.project-list-left-info {
+.subproject-name-cell {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-  flex: 1;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.project-list-name {
+.subproject-name {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.project-list-client {
-  font-size: 11px;
-  color: var(--text-muted);
+.subproject-client {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
-.project-list-size {
+.subproject-size-badge {
   font-family: monospace;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  background: rgba(255, 187, 0, 0.12);
   color: #ffbb00;
-  padding: 2px 7px;
+  background-color: rgba(255, 187, 0, 0.1);
+  padding: 3px 8px;
   border-radius: 4px;
+  display: inline-block;
   white-space: nowrap;
 }
 
-.project-list-actions {
+.subproject-actions-cell {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 6px;
+}
+
+.drive-list-empty-state {
+  padding: 24px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  background-color: rgba(0, 0, 0, 0.15);
 }
 
 /* Responsive tweaks */

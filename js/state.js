@@ -319,15 +319,20 @@ class StateStore {
     let singleCopyCount = 0;
     let safeBackupCount = 0;
     let unassignedProjectsCount = 0;
+    let atRiskCount = 0;
 
     for (const project of this.projects) {
       const copies = (project.drives || []).length;
+      const isArchived = (project.tags || []).some(t => String(t).trim().toLowerCase() === 'arquivado');
+      
       totalPhysicalUsedGB += (project.sizeGB || 0) * copies;
       if (copies === 0) {
         unassignedProjectsCount++;
         singleCopyCount++;
+        if (!isArchived) atRiskCount++;
       } else if (copies === 1) {
         singleCopyCount++;
+        if (!isArchived) atRiskCount++;
       } else {
         safeBackupCount++;
       }
@@ -350,7 +355,8 @@ class StateStore {
       uniqueProjectsDataGB,
       singleCopyCount,
       safeBackupCount,
-      safeBackupPct
+      safeBackupPct,
+      atRiskCount
     };
   }
 
